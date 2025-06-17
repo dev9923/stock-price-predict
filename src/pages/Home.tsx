@@ -35,7 +35,6 @@ const stats = [
 const Home: React.FC = () => {
   return (
     <div className="bg-white">
-      {/* Hero Section */}
       <header className="min-h-screen flex items-center justify-center text-center px-4 md:px-12 bg-gradient-to-br from-blue-100 via-white to-blue-50">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -66,7 +65,6 @@ const Home: React.FC = () => {
         </motion.div>
       </header>
 
-      {/* Features Section */}
       <section id="features" className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -100,7 +98,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
       <section className="py-24 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
@@ -123,7 +120,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-24 bg-primary-600 text-white text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -151,4 +147,3 @@ const Home: React.FC = () => {
 }
 
 export default Home
-
