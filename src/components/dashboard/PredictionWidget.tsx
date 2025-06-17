@@ -13,10 +13,10 @@ const PredictionWidget: React.FC = () => {
 
   const fetchPrediction = async () => {
     if (!subscriptionService.hasPremiumAccess()) return
-    
+
     setIsLoading(true)
     setError(null)
-    
+
     try {
       const result = await stockApi.getPrediction()
       setPrediction(result)
@@ -30,10 +30,8 @@ const PredictionWidget: React.FC = () => {
 
   useEffect(() => {
     fetchPrediction()
-    
-    // Update prediction every hour
-    const interval = setInterval(fetchPrediction, 3600000)
-    
+
+    const interval = setInterval(fetchPrediction, 3600000) // every hour
     return () => clearInterval(interval)
   }, [])
 
@@ -88,15 +86,17 @@ const PredictionWidget: React.FC = () => {
             <Brain className="h-5 w-5 text-primary-600" />
             <span className="text-sm font-medium text-gray-600">AI Prediction</span>
           </div>
-          
+
           <div className="space-y-2">
             <div className="text-3xl font-bold text-gray-900">
               ₹{prediction.predictedPrice.toFixed(2)}
             </div>
-            
-            <div className={`flex items-center justify-center space-x-1 ${
-              isPositive ? 'text-secondary-600' : 'text-red-600'
-            }`}>
+
+            <div
+              className={`flex items-center justify-center space-x-1 ${
+                isPositive ? 'text-secondary-600' : 'text-red-600'
+              }`}
+            >
               {isPositive ? (
                 <TrendingUp className="h-4 w-4" />
               ) : (
@@ -146,11 +146,15 @@ const PredictionWidget: React.FC = () => {
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-600 mb-1">SMA 20</div>
-            <div className="font-medium">₹{prediction.technicalIndicators.sma20.toFixed(2)}</div>
+            <div className="font-medium">
+              ₹{prediction.technicalIndicators.sma20.toFixed(2)}
+            </div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-600 mb-1">SMA 50</div>
-            <div className="font-medium">₹{prediction.technicalIndicators.sma50.toFixed(2)}</div>
+            <div className="font-medium">
+              ₹{prediction.technicalIndicators.sma50.toFixed(2)}
+            </div>
           </div>
         </div>
 
