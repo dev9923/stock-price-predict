@@ -7,35 +7,33 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
+  ResponsiveContainer
 } from 'recharts'
 import { Calendar, TrendingUp, Bell, Settings } from 'lucide-react'
+
 import LiveStockWidget from '../components/dashboard/LiveStockWidget'
 import PredictionWidget from '../components/dashboard/PredictionWidget'
 import { stockApi, StockData } from '../services/stockApi'
 import { subscriptionService } from '../services/subscriptionService'
 
-interface NewsItem {
-  id: string
+interface NewsArticle {
+  id?: string | number
   title: string
   summary: string
-  timestamp: number
-  sentiment: 'positive' | 'negative' | 'neutral'
+  timestamp: string | number
+  sentiment: 'positive' | 'neutral' | 'negative'
 }
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const [stockData, setStockData] = useState<StockData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState('1M')
-  const [news, setNews] = useState<NewsItem[]>([])
+  const [news, setNews] = useState<NewsArticle[]>([])
 
-  const periods = [
-    { label: '1W', value: '1W' },
-    { label: '1M', value: '1M' },
-    { label: '3M', value: '3M' },
-    { label: '6M', value: '6M' },
-    { label: '1Y', value: '1Y' },
-  ]
+  const periods = ['1W', '1M', '3M', '6M', '1Y'].map((val) => ({
+    label: val,
+    value: val
+  }))
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +41,7 @@ const Dashboard = () => {
       try {
         const [historicalData, marketNews] = await Promise.all([
           stockApi.getHistoricalData('YESBANK', selectedPeriod),
-          stockApi.getMarketNews(),
+          stockApi.getMarketNews()
         ])
         setStockData(historicalData)
         setNews(marketNews)
@@ -85,7 +83,7 @@ const Dashboard = () => {
               {subscription && (
                 <div
                   className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                    subscription.planId === 'premium' || subscription.planId === 'pro'
+                    ['premium', 'pro'].includes(subscription.planId)
                       ? 'bg-primary-100 text-primary-700'
                       : 'bg-gray-100 text-gray-700'
                   }`}
@@ -101,7 +99,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Stock Chart */}
+            {/* Price Chart */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -138,12 +136,12 @@ const Dashboard = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="date"
-                        tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                        tickFormatter={(val) => new Date(val).toLocaleDateString()}
                       />
                       <YAxis />
                       <Tooltip
-                        labelFormatter={(value) => new Date(value).toLocaleDateString()}
-                        formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Close Price']}
+                        labelFormatter={(val) => new Date(val).toLocaleDateString()}
+                        formatter={(val: number) => [`₹${val.toFixed(2)}`, 'Close Price']}
                       />
                       <Line
                         type="monotone"
@@ -167,8 +165,11 @@ const Dashboard = () => {
             >
               <h2 className="text-xl font-bold text-gray-900 mb-6">Market News</h2>
               <div className="space-y-4">
-                {news.map((article) => (
-                  <div key={article.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                {news.map((article, index) => (
+                  <div
+                    key={article.id ?? index}
+                    className="border-b border-gray-200 pb-4 last:border-b-0"
+                  >
                     <h3 className="font-medium text-gray-900 mb-2">{article.title}</h3>
                     <p className="text-sm text-gray-600 mb-2">{article.summary}</p>
                     <div className="flex items-center justify-between">
@@ -197,6 +198,8 @@ const Dashboard = () => {
           <div className="space-y-8">
             <LiveStockWidget />
             <PredictionWidget />
+
+            {/* Quick Actions */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -205,15 +208,26 @@ const Dashboard = () => {
             >
               <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <button
+                  className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Set Price Alert"
+                >
                   <Bell className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Set Price Alert</span>
                 </button>
-                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+
+                <button
+                  className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="View Analysis"
+                >
                   <TrendingUp className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">View Analysis</span>
                 </button>
-                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+
+                <button
+                  className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Open Settings"
+                >
                   <Settings className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Settings</span>
                 </button>
