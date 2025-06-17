@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from 'recharts'
 import { Calendar, TrendingUp, Bell, Settings } from 'lucide-react'
 import LiveStockWidget from '../components/dashboard/LiveStockWidget'
@@ -15,18 +15,26 @@ import PredictionWidget from '../components/dashboard/PredictionWidget'
 import { stockApi, StockData } from '../services/stockApi'
 import { subscriptionService } from '../services/subscriptionService'
 
+interface NewsItem {
+  id: string
+  title: string
+  summary: string
+  timestamp: number
+  sentiment: 'positive' | 'negative' | 'neutral'
+}
+
 const Dashboard = () => {
   const [stockData, setStockData] = useState<StockData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState('1M')
-  const [news, setNews] = useState<any[]>([])
+  const [news, setNews] = useState<NewsItem[]>([])
 
   const periods = [
     { label: '1W', value: '1W' },
     { label: '1M', value: '1M' },
     { label: '3M', value: '3M' },
     { label: '6M', value: '6M' },
-    { label: '1Y', value: '1Y' }
+    { label: '1Y', value: '1Y' },
   ]
 
   useEffect(() => {
@@ -35,9 +43,8 @@ const Dashboard = () => {
       try {
         const [historicalData, marketNews] = await Promise.all([
           stockApi.getHistoricalData('YESBANK', selectedPeriod),
-          stockApi.getMarketNews()
+          stockApi.getMarketNews(),
         ])
-        
         setStockData(historicalData)
         setNews(marketNews)
       } catch (error) {
@@ -63,14 +70,10 @@ const Dashboard = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Stock Dashboard
-              </h1>
-              <p className="text-gray-600">
-                Real-time Yes Bank stock analysis and predictions
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Stock Dashboard</h1>
+              <p className="text-gray-600">Real-time Yes Bank stock analysis and predictions</p>
             </div>
-            
+
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <div className="flex items-center space-x-2 px-3 py-2 bg-white rounded-lg shadow-sm">
                 <Calendar className="h-4 w-4 text-gray-500" />
@@ -78,13 +81,15 @@ const Dashboard = () => {
                   {new Date().toLocaleDateString()}
                 </span>
               </div>
-              
+
               {subscription && (
-                <div className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                  subscription.planId === 'premium' || subscription.planId === 'pro'
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'bg-gray-100 text-gray-700'
-                }`}>
+                <div
+                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                    subscription.planId === 'premium' || subscription.planId === 'pro'
+                      ? 'bg-primary-100 text-primary-700'
+                      : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
                   {subscription.planId.charAt(0).toUpperCase() + subscription.planId.slice(1)} Plan
                 </div>
               )}
@@ -94,7 +99,7 @@ const Dashboard = () => {
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Charts and Analysis */}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Stock Chart */}
             <motion.div
@@ -105,7 +110,6 @@ const Dashboard = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Price Chart</h2>
-                
                 <div className="flex space-x-2">
                   {periods.map((period) => (
                     <button
@@ -132,19 +136,19 @@ const Dashboard = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={stockData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="date" 
+                      <XAxis
+                        dataKey="date"
                         tickFormatter={(value) => new Date(value).toLocaleDateString()}
                       />
                       <YAxis />
-                      <Tooltip 
+                      <Tooltip
                         labelFormatter={(value) => new Date(value).toLocaleDateString()}
                         formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Close Price']}
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="close" 
-                        stroke="#3b82f6" 
+                      <Line
+                        type="monotone"
+                        dataKey="close"
+                        stroke="#3b82f6"
                         strokeWidth={2}
                         dot={false}
                       />
@@ -162,9 +166,8 @@ const Dashboard = () => {
               className="card p-6"
             >
               <h2 className="text-xl font-bold text-gray-900 mb-6">Market News</h2>
-              
               <div className="space-y-4">
-                {news.map((article, index) => (
+                {news.map((article) => (
                   <div key={article.id} className="border-b border-gray-200 pb-4 last:border-b-0">
                     <h3 className="font-medium text-gray-900 mb-2">{article.title}</h3>
                     <p className="text-sm text-gray-600 mb-2">{article.summary}</p>
@@ -172,13 +175,15 @@ const Dashboard = () => {
                       <span className="text-xs text-gray-500">
                         {new Date(article.timestamp).toLocaleString()}
                       </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        article.sentiment === 'positive' 
-                          ? 'bg-secondary-100 text-secondary-700'
-                          : article.sentiment === 'negative'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          article.sentiment === 'positive'
+                            ? 'bg-secondary-100 text-secondary-700'
+                            : article.sentiment === 'negative'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
                         {article.sentiment}
                       </span>
                     </div>
@@ -188,15 +193,10 @@ const Dashboard = () => {
             </motion.div>
           </div>
 
-          {/* Right Column - Widgets */}
+          {/* Right Column */}
           <div className="space-y-8">
-            {/* Live Stock Widget */}
             <LiveStockWidget />
-            
-            {/* Prediction Widget */}
             <PredictionWidget />
-            
-            {/* Quick Actions */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -204,18 +204,15 @@ const Dashboard = () => {
               className="card p-6"
             >
               <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
-              
               <div className="space-y-3">
                 <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <Bell className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Set Price Alert</span>
                 </button>
-                
                 <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <TrendingUp className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">View Analysis</span>
                 </button>
-                
                 <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <Settings className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Settings</span>
