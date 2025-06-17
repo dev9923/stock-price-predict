@@ -7,29 +7,29 @@ const features = [
   {
     icon: BarChart3,
     title: 'Real-Time Price',
-    description: 'Access up-to-the-minute stock price updates for Yes Bank.'
+    description: 'Access up-to-the-minute stock price updates for Yes Bank.',
   },
   {
     icon: Brain,
     title: 'AI Predictions',
-    description: 'Utilize machine learning models to forecast future stock trends.'
+    description: 'Utilize machine learning models to forecast future stock trends.',
   },
   {
     icon: Bell,
     title: 'Price Alerts',
-    description: 'Get notified when the stock hits your target price.'
+    description: 'Get notified when the stock hits your target price.',
   },
   {
     icon: ShieldCheck,
     title: 'Secure Access',
-    description: 'Your data and access are secured with industry best practices.'
-  }
+    description: 'Your data and access are secured with industry best practices.',
+  },
 ]
 
 const stats = [
   { label: 'Active Users', value: 15823 },
   { label: 'Prediction Accuracy', value: 87 },
-  { label: 'Alerts Sent', value: 24560 }
+  { label: 'Alerts Sent', value: 24560 },
 ]
 
 const Home: React.FC = () => {
@@ -68,12 +68,11 @@ const Home: React.FC = () => {
 
       {/* Features Section */}
       <section id="features" className="py-24 bg-gray-50">
-        <div className="container-max">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us?</h2>
             <p className="text-gray-600 max-w-xl mx-auto">
-              Our platform combines real-time data, AI predictions, and intuitive tools to help you
-              make smarter investment decisions.
+              Our platform combines real-time data, AI predictions, and intuitive tools to help you make smarter investment decisions.
             </p>
           </div>
 
@@ -85,9 +84,9 @@ const Home: React.FC = () => {
                   key={feature.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.2 }}
+                  transition={{ delay: index * 0.2, duration: 0.5 }}
                   viewport={{ once: true }}
-                  className="card p-8 text-center group"
+                  className="card p-8 text-center group bg-white shadow-sm hover:shadow-md rounded-xl"
                 >
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-6 group-hover:bg-primary-600 transition-colors duration-300">
                     <Icon className="h-8 w-8 text-primary-600 group-hover:text-white transition-colors duration-300" />
@@ -103,7 +102,7 @@ const Home: React.FC = () => {
 
       {/* Stats Section */}
       <section className="py-24 bg-white">
-        <div className="container-max">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
             {stats.map((stat, index) => (
               <motion.div
@@ -131,7 +130,7 @@ const Home: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="container-max"
+          className="max-w-4xl mx-auto px-4"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to Make Smarter Investments?
