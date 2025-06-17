@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, TrendingUp, Crown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
