@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
@@ -6,8 +5,6 @@ import {
   BarChart3, 
   Brain, 
   Target, 
-  ArrowRight, 
-  Play,
   CheckCircle,
   Star,
   Crown,
