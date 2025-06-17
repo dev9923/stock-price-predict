@@ -2,8 +2,12 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { Toaster } from 'react-hot-toast'
+
+// Layout Components
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
+
+// Pages
 import Home from './pages/Home'
 import About from './pages/About'
 import Methodology from './pages/Methodology'
@@ -14,11 +18,12 @@ import Pricing from './pages/Pricing'
 
 const queryClient = new QueryClient()
 
-function App() {
+const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-gray-50">
         <Navbar />
+
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -30,8 +35,10 @@ function App() {
             <Route path="/pricing" element={<Pricing />} />
           </Routes>
         </main>
+
         <Footer />
-        <Toaster 
+
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
