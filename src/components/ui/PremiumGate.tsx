@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Lock, Crown, Zap, TrendingUp } from 'lucide-react'
+import { Crown, Zap } from 'lucide-react' // Removed Lock, TrendingUp
 import { subscriptionService } from '../../services/subscriptionService'
 
 interface PremiumGateProps {
@@ -22,7 +22,7 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, className 
       <div className="filter blur-sm pointer-events-none opacity-50">
         {children}
       </div>
-      
+
       {/* Premium overlay */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -38,10 +38,10 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, className 
           >
             <Crown className="h-8 w-8" />
           </motion.div>
-          
+
           <h3 className="text-xl font-bold mb-2">Premium Feature</h3>
           <p className="text-white/90 mb-4">{feature}</p>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => window.location.href = '/pricing'}
