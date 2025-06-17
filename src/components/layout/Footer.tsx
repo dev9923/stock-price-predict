@@ -23,6 +23,7 @@ const Footer = () => {
                 href="mailto:devanshbansal500@gmail.com"
                 className="p-2 bg-gray-800 rounded-lg hover:bg-primary-600 transition-colors"
                 aria-label="Email"
+                title="Send Email"
               >
                 <Mail className="h-5 w-5" />
               </a>
@@ -32,6 +33,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="p-2 bg-gray-800 rounded-lg hover:bg-primary-600 transition-colors"
                 aria-label="GitHub"
+                title="GitHub Profile"
               >
                 <Github className="h-5 w-5" />
               </a>
@@ -41,6 +43,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="p-2 bg-gray-800 rounded-lg hover:bg-primary-600 transition-colors"
                 aria-label="LinkedIn"
+                title="LinkedIn Profile"
               >
                 <Linkedin className="h-5 w-5" />
               </a>
@@ -78,59 +81,34 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Resources</h3>
             <ul className="space-y-2">
-              <li>
-                <a
-                  href="https://www.yesbank.in/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors flex items-center"
-                >
-                  Yes Bank Official
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.nseindia.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors flex items-center"
-                >
-                  NSE India
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://scikit-learn.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors flex items-center"
-                >
-                  Scikit-learn
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://pandas.pydata.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors flex items-center"
-                >
-                  Pandas
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </a>
-              </li>
+              {[
+                { name: 'Yes Bank Official', href: 'https://www.yesbank.in/' },
+                { name: 'NSE India', href: 'https://www.nseindia.com/' },
+                { name: 'Scikit-learn', href: 'https://scikit-learn.org/' },
+                { name: 'Pandas', href: 'https://pandas.pydata.org/' },
+              ].map((resource) => (
+                <li key={resource.href}>
+                  <a
+                    href={resource.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors flex items-center"
+                    title={resource.name}
+                  >
+                    {resource.name}
+                    <ExternalLink className="h-3 w-3 ml-1" />
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-sm text-center md:text-left">
             © 2025 Devansh Bansal. All rights reserved.
           </p>
-          <p className="text-gray-400 text-sm mt-2 md:mt-0">
+          <p className="text-gray-400 text-sm text-center md:text-right mt-2 md:mt-0">
             Student at SRM Institute of Science and Technology
           </p>
         </div>
