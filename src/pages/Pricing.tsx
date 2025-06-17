@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Check, Crown, Zap, Star, ArrowRight } from 'lucide-react'
 import { subscriptionPlans, subscriptionService } from '../services/subscriptionService'
