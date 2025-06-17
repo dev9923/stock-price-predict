@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface StockData {
   date: string
   open: number
@@ -86,3 +88,14 @@ export const stockApi = {
     }
   },
 }
+
+const Contact: React.FC = () => {
+  return (
+    <div>
+      <h1>Contact Page</h1>
+      {/* TODO: Add your real contact content here */}
+    </div>
+  );
+};
+
+export default Contact;
