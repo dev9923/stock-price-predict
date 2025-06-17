@@ -1,6 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js'
 
-// Initialize Stripe with typed env var fallback
 const stripePromise = loadStripe(
   import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_example'
 )
@@ -95,49 +94,63 @@ class SubscriptionService {
   async createCheckoutSession(planId: string): Promise<void> {
     try {
       const stripe = await stripePromise
-      if (!stripe) throw new Error('Stripe not loaded')
+      if (!stripe) throw new Error('Stripe not initialized')
 
-      // Simulate checkout & store mock subscription
+      // 🔁 Mock logic for local testing
       const plan = subscriptionPlans.find(p => p.id === planId)
-      if (plan) {
-        const subscription: UserSubscription = {
-          planId,
-          status: 'active',
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          cancelAtPeriodEnd: false
-        }
+      if (!plan) throw new Error('Invalid plan selected')
 
-        localStorage.setItem('userSubscription', JSON.stringify(subscription))
-        this.currentSubscription = subscription
+      // In production, replace with call to your backend API like:
+      // const res = await fetch('/api/create-checkout-session', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ planId }),
+      // });
+      // const session = await res.json();
+      // await stripe.redirectToCheckout({ sessionId: session.id });
 
-        window.location.href = '/subscription-success'
+      // Mock: Simulate subscription success
+      const subscription: UserSubscription = {
+        planId,
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        cancelAtPeriodEnd: false
       }
+
+      localStorage.setItem('userSubscription', JSON.stringify(subscription))
+      this.currentSubscription = subscription
+
+      window.location.href = '/subscription-success'
     } catch (error) {
-      console.error('Checkout session failed:', error)
+      console.error('Checkout failed:', error)
       throw error
     }
   }
 
   async cancelSubscription(): Promise<void> {
     try {
-      if (this.currentSubscription) {
-        this.currentSubscription.cancelAtPeriodEnd = true
-        localStorage.setItem('userSubscription', JSON.stringify(this.currentSubscription))
-      }
+      const sub = this.getCurrentSubscription()
+      if (!sub) throw new Error('No active subscription')
+
+      sub.cancelAtPeriodEnd = true
+      localStorage.setItem('userSubscription', JSON.stringify(sub))
+      this.currentSubscription = sub
     } catch (error) {
-      console.error('Cancel error:', error)
+      console.error('Cancel failed:', error)
       throw error
     }
   }
 
   async reactivateSubscription(): Promise<void> {
     try {
-      if (this.currentSubscription) {
-        this.currentSubscription.cancelAtPeriodEnd = false
-        localStorage.setItem('userSubscription', JSON.stringify(this.currentSubscription))
-      }
+      const sub = this.getCurrentSubscription()
+      if (!sub) throw new Error('No subscription to reactivate')
+
+      sub.cancelAtPeriodEnd = false
+      localStorage.setItem('userSubscription', JSON.stringify(sub))
+      this.currentSubscription = sub
     } catch (error) {
-      console.error('Reactivate error:', error)
+      console.error('Reactivation failed:', error)
       throw error
     }
   }
