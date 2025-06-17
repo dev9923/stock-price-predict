@@ -39,12 +39,24 @@ const Dashboard: React.FC = () => {
     const fetchData = async () => {
       setIsLoading(true)
       try {
+        // ✅ FIX: Match actual API signature for getHistoricalData
         const [historicalData, marketNews] = await Promise.all([
-          stockApi.getHistoricalData('YESBANK', selectedPeriod),
+          stockApi.getHistoricalData({ symbol: 'YESBANK', period: selectedPeriod }),
           stockApi.getMarketNews()
         ])
+
         setStockData(historicalData)
-        setNews(marketNews)
+
+        // ✅ FIX: Transform MarketNewsItem[] into NewsArticle[]
+        setNews(
+          marketNews.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            summary: item.summary,
+            timestamp: item.timestamp ?? Date.now(),
+            sentiment: item.sentiment ?? 'neutral'
+          }))
+        )
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
       } finally {
@@ -59,7 +71,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+      <div className="container-max py-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -104,7 +116,7 @@ const Dashboard: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="card p-6 bg-white rounded-xl shadow-sm"
+              className="card p-6"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Price Chart</h2>
@@ -136,7 +148,7 @@ const Dashboard: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="date"
-                        tickFormatter={(val) =>
+                        tickFormatter={(val: string | number) =>
                           new Date(val).toLocaleDateString()
                         }
                       />
@@ -163,7 +175,7 @@ const Dashboard: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="card p-6 bg-white rounded-xl shadow-sm"
+              className="card p-6"
             >
               <h2 className="text-xl font-bold text-gray-900 mb-6">Market News</h2>
               <div className="space-y-4">
@@ -174,12 +186,14 @@ const Dashboard: React.FC = () => {
                   >
                     <h3 className="font-medium text-gray-900 mb-2">{article.title}</h3>
                     <p className="text-sm text-gray-600 mb-2">{article.summary}</p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{new Date(article.timestamp).toLocaleString()}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">
+                        {new Date(article.timestamp).toLocaleString()}
+                      </span>
                       <span
-                        className={`px-2 py-1 rounded-full font-medium ${
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
                           article.sentiment === 'positive'
-                            ? 'bg-green-100 text-green-700'
+                            ? 'bg-secondary-100 text-secondary-700'
                             : article.sentiment === 'negative'
                             ? 'bg-red-100 text-red-700'
                             : 'bg-gray-100 text-gray-700'
@@ -204,7 +218,7 @@ const Dashboard: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="card p-6 bg-white rounded-xl shadow-sm"
+              className="card p-6"
             >
               <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
