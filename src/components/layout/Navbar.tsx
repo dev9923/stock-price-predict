@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, TrendingUp, Crown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -6,6 +7,8 @@ import { subscriptionService } from '../../services/subscriptionService'
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [hasPremium, setHasPremium] = useState(false)
+  const [subscription, setSubscription] = useState(null)
   const location = useLocation()
 
   useEffect(() => {
@@ -14,6 +17,11 @@ const Navbar = () => {
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    setHasPremium(subscriptionService.hasPremiumAccess())
+    setSubscription(subscriptionService.getCurrentSubscription())
   }, [])
 
   const navItems = [
@@ -25,22 +33,24 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ]
 
-  const subscription = subscriptionService.getCurrentSubscription()
-  const hasPremium = subscriptionService.hasPremiumAccess()
-
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
-    }`}>
+    <nav
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
+      }`}
+    >
       <div className="container-max">
         <div className="flex justify-between items-center py-4">
+          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="p-2 bg-primary-600 rounded-lg">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
-            <span className={`text-xl font-bold ${
-              scrolled ? 'text-gray-900' : 'text-white'
-            }`}>
+            <span
+              className={`text-xl font-bold ${
+                scrolled ? 'text-gray-900' : 'text-white'
+              }`}
+            >
               YesBank ML
             </span>
           </Link>
@@ -53,15 +63,19 @@ const Navbar = () => {
                 to={item.path}
                 className={`font-medium transition-colors duration-200 ${
                   location.pathname === item.path
-                    ? scrolled ? 'text-primary-600' : 'text-white'
-                    : scrolled ? 'text-gray-700 hover:text-primary-600' : 'text-gray-200 hover:text-white'
+                    ? scrolled
+                      ? 'text-primary-600'
+                      : 'text-white'
+                    : scrolled
+                    ? 'text-gray-700 hover:text-primary-600'
+                    : 'text-gray-200 hover:text-white'
                 }`}
               >
                 {item.name}
               </Link>
             ))}
-            
-            {/* Subscription Status / Pricing Link */}
+
+            {/* Premium Status */}
             {hasPremium ? (
               <div className="flex items-center space-x-2 px-3 py-2 bg-primary-100 rounded-lg">
                 <Crown className="h-4 w-4 text-primary-600" />
@@ -80,7 +94,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded-lg transition-colors ${
@@ -96,6 +110,7 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            layout
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -104,10 +119,11 @@ const Navbar = () => {
             <div className="container-max py-4">
               {navItems.map((item, index) => (
                 <motion.div
+                  layout
                   key={item.name}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.08 }}
                 >
                   <Link
                     to={item.path}
@@ -122,12 +138,13 @@ const Navbar = () => {
                   </Link>
                 </motion.div>
               ))}
-              
-              {/* Mobile Subscription Link */}
+
+              {/* Mobile Premium Status */}
               <motion.div
+                layout
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: navItems.length * 0.1 }}
+                transition={{ delay: navItems.length * 0.08 }}
                 className="mt-4 pt-4 border-t border-gray-200"
               >
                 {hasPremium ? (
