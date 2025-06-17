@@ -2,16 +2,16 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   TrendingUp,
-  TrendingDown,
   Activity,
   ArrowRight,
-  BarChart2,
   LineChart,
-  Zap
+  Zap,
 } from 'lucide-react'
 
+type Tab = 'predictions' | 'comparison' | 'features'
+
 const Results = () => {
-  const [activeTab, setActiveTab] = useState<'predictions' | 'comparison' | 'features'>('predictions')
+  const [activeTab, setActiveTab] = useState<Tab>('predictions')
 
   const tabs = [
     { id: 'predictions', name: 'Predictions' },
@@ -26,7 +26,7 @@ const Results = () => {
       change: '+2.1%',
       trend: 'up',
       icon: TrendingUp,
-      color: 'secondary'
+      color: 'text-secondary-600'
     },
     {
       title: 'Precision',
@@ -34,7 +34,7 @@ const Results = () => {
       change: '+1.7%',
       trend: 'up',
       icon: Zap,
-      color: 'primary'
+      color: 'text-primary-600'
     },
     {
       title: 'Recall',
@@ -42,7 +42,7 @@ const Results = () => {
       change: '+1.9%',
       trend: 'up',
       icon: Activity,
-      color: 'accent'
+      color: 'text-accent-600'
     },
     {
       title: 'F1 Score',
@@ -50,7 +50,7 @@ const Results = () => {
       change: '+2.3%',
       trend: 'up',
       icon: LineChart,
-      color: 'secondary'
+      color: 'text-secondary-600'
     }
   ]
 
@@ -66,14 +66,14 @@ const Results = () => {
         </motion.div>
       </section>
 
-      {/* Tab Navigation */}
+      {/* Tabs */}
       <section className="section-padding border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex space-x-4 justify-center">
-            {tabs.map((tab) => (
+            {tabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as 'predictions' | 'comparison' | 'features')}
+                onClick={() => setActiveTab(tab.id as Tab)}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-primary-600 text-white'
@@ -114,12 +114,8 @@ const Results = () => {
                   return (
                     <div key={metric.title} className="card p-6 flex flex-col items-start space-y-2">
                       <div className="flex items-center justify-between w-full">
-                        <Icon className={`h-6 w-6 text-${metric.color}-600`} />
-                        <div
-                          className={`text-sm ${
-                            metric.trend === 'up' ? 'text-secondary-600' : 'text-accent-600'
-                          }`}
-                        >
+                        <Icon className={`h-6 w-6 ${metric.color}`} />
+                        <div className="text-sm text-secondary-600">
                           {metric.trend === 'up' ? '+' : ''}
                           {metric.change}
                         </div>
