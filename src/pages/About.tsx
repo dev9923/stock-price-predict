@@ -4,8 +4,8 @@ import {
   Brain,
   BarChart3,
   Database,
-  LucideIcon
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface Objective {
   icon: LucideIcon
@@ -41,25 +41,10 @@ const About: React.FC = () => {
     },
   ]
 
-  const technologies: string[] = [
-    'Python',
-    'Pandas',
-    'NumPy',
-    'Scikit-learn',
-    'TensorFlow',
-    'Matplotlib',
-    'Seaborn',
-    'Jupyter Notebook',
-    'Random Forest',
-    'LSTM',
-    'Linear Regression',
-    'SVM',
-  ]
-
   return (
     <div className="min-h-screen pt-20">
       {/* Project Objectives */}
-      <section className="section-padding bg-gray-50">
+      <section className="py-20 bg-gray-50">
         <div className="container-max">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -76,34 +61,27 @@ const About: React.FC = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {objectives.map((objective, index) => {
-              const Icon = objective.icon
-              return (
-                <motion.div
-                  key={`objective-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="card p-6 flex items-start space-x-4"
-                >
-                  <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <Icon className="h-6 w-6 text-primary-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {objective.title}
-                    </h3>
-                    <p className="text-gray-600">{objective.description}</p>
-                  </div>
-                </motion.div>
-              )
-            })}
+            {objectives.map(({ icon: Icon, title, description }) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                viewport={{ once: true }}
+                className="card p-6 flex items-start space-x-4"
+              >
+                <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                  <Icon className="h-6 w-6 text-primary-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+                  <p className="text-gray-600">{description}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
-
-      {/* Developer/Other Sections would go here */}
     </div>
   )
 }
