@@ -1,8 +1,16 @@
 import { loadStripe } from '@stripe/stripe-js'
 
-// Define environment variable type to fix TS error
+// Fix: Declare import.meta.env typing for Vite
+interface ImportMetaEnv {
+  readonly VITE_STRIPE_PUBLISHABLE_KEY: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
 const STRIPE_PUBLISHABLE_KEY =
-  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_example'
+  import.meta.env?.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_example'
 
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY)
 
@@ -78,13 +86,20 @@ class SubscriptionService {
   getCurrentSubscription(): UserSubscription | null {
     if (this.currentSubscription) return this.currentSubscription
 
-    const stored = localStorage.getItem('userSubscription')
-    if (stored) {
-      try {
-        this.currentSubscription = JSON.parse(stored)
-      } catch {
-        localStorage.removeItem('userSubscription')
+    try {
+      const stored = localStorage.getItem('userSubscription')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (
+          parsed &&
+          typeof parsed.planId === 'string' &&
+          typeof parsed.status === 'string'
+        ) {
+          this.currentSubscription = parsed as UserSubscription
+        }
       }
+    } catch {
+      localStorage.removeItem('userSubscription')
     }
 
     return this.currentSubscription
