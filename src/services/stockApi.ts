@@ -1,4 +1,4 @@
-// Mock API service - Replace with real APIs in production
+// src/services/stockApi.ts
 
 export interface StockData {
   date: string
@@ -38,11 +38,11 @@ export interface MarketNewsItem {
   publishedAt: string
 }
 
-// Mock stock data generator
-const generateMockStockData = (days: number = 30): StockData[] => {
+// ===== MOCK GENERATORS =====
+
+const generateMockStockData = (days = 30): StockData[] => {
   const data: StockData[] = []
-  const basePrice = 45 + Math.random() * 10
-  let currentPrice = basePrice
+  let currentPrice = 45 + Math.random() * 10
 
   for (let i = days; i >= 0; i--) {
     const date = new Date()
@@ -53,16 +53,16 @@ const generateMockStockData = (days: number = 30): StockData[] => {
 
     const open = currentPrice
     const close = Math.max(0.1, currentPrice + change)
-    const high = Math.max(open, close) * (1 + Math.random() * 0.02)
-    const low = Math.min(open, close) * (1 - Math.random() * 0.02)
-    const volume = Math.floor(1_000_000 + Math.random() * 5_000_000)
+    const high = Math.max(open, close) * (1 + Math.random() * 0.01)
+    const low = Math.min(open, close) * (1 - Math.random() * 0.01)
+    const volume = Math.floor(1_000_000 + Math.random() * 4_000_000)
 
     data.push({
       date: date.toISOString().split('T')[0],
-      open: Number(open.toFixed(2)),
-      high: Number(high.toFixed(2)),
-      low: Number(low.toFixed(2)),
-      close: Number(close.toFixed(2)),
+      open: parseFloat(open.toFixed(2)),
+      high: parseFloat(high.toFixed(2)),
+      low: parseFloat(low.toFixed(2)),
+      close: parseFloat(close.toFixed(2)),
       volume,
     })
 
@@ -72,7 +72,6 @@ const generateMockStockData = (days: number = 30): StockData[] => {
   return data
 }
 
-// Mock news generator
 const generateMockNews = (): MarketNewsItem[] => [
   {
     title: 'Market rallies on strong earnings reports',
@@ -90,10 +89,9 @@ const generateMockNews = (): MarketNewsItem[] => [
   },
 ]
 
-// Mock prediction generator
 const generateMockPrediction = (): PredictionResult => ({
   currentPrice: 46.25,
-  predictedPrice: 48.60,
+  predictedPrice: 48.6,
   confidence: 0.85,
   trend: 'up',
   analysis: 'Yes Bank is expected to rise due to strong earnings and technical momentum.',
@@ -110,11 +108,15 @@ const generateMockPrediction = (): PredictionResult => ({
   },
 })
 
+// ===== SERVICE METHODS =====
+
 export const stockApi = {
-  // Get historical stock data
+  /**
+   * Get mock historical stock data
+   */
   getHistoricalData: async (): Promise<StockData[]> => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API delay
+      await new Promise((res) => setTimeout(res, 1000))
       return generateMockStockData(30)
     } catch (error) {
       console.error('Error fetching historical data:', error)
@@ -122,21 +124,25 @@ export const stockApi = {
     }
   },
 
-  // Get current stock price
+  /**
+   * Get current stock price
+   */
   getCurrentPrice: async (): Promise<number> => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      return 45.67 + (Math.random() - 0.5) * 5
+      await new Promise((res) => setTimeout(res, 500))
+      return parseFloat((45.67 + (Math.random() - 0.5) * 4).toFixed(2))
     } catch (error) {
       console.error('Error fetching current price:', error)
       return 45.67
     }
   },
 
-  // Get prediction data
+  /**
+   * Get stock prediction result
+   */
   getPrediction: async (): Promise<PredictionResult> => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((res) => setTimeout(res, 500))
       return generateMockPrediction()
     } catch (error) {
       console.error('Error fetching prediction:', error)
@@ -144,10 +150,12 @@ export const stockApi = {
     }
   },
 
-  // Get market news
+  /**
+   * Get latest market news
+   */
   getMarketNews: async (): Promise<MarketNewsItem[]> => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((res) => setTimeout(res, 500))
       return generateMockNews()
     } catch (error) {
       console.error('Error fetching market news:', error)
