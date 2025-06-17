@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Brain, TrendingUp, TrendingDown, Target, AlertCircle } from 'lucide-react'
+import {
+  Brain,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  AlertCircle,
+} from 'lucide-react'
 import { stockApi, PredictionResult } from '../../services/stockApi'
 import { subscriptionService } from '../../services/subscriptionService'
 import PremiumGate from '../ui/PremiumGate'
@@ -19,10 +25,18 @@ const PredictionWidget: React.FC = () => {
 
     try {
       const result = await stockApi.getPrediction()
-      setPrediction(result)
+      if (
+        result &&
+        typeof result.predictedPrice === 'number' &&
+        typeof result.currentPrice === 'number'
+      ) {
+        setPrediction(result)
+      } else {
+        throw new Error('Invalid prediction data')
+      }
     } catch (err) {
-      setError('Failed to fetch prediction')
       console.error('Prediction error:', err)
+      setError('Failed to fetch prediction')
     } finally {
       setIsLoading(false)
     }
@@ -30,8 +44,7 @@ const PredictionWidget: React.FC = () => {
 
   useEffect(() => {
     fetchPrediction()
-
-    const interval = setInterval(fetchPrediction, 3600000) // every hour
+    const interval = setInterval(fetchPrediction, 3600000) // refresh every hour
     return () => clearInterval(interval)
   }, [])
 
@@ -75,8 +88,21 @@ const PredictionWidget: React.FC = () => {
     }
 
     const priceChange = prediction.predictedPrice - prediction.currentPrice
-    const priceChangePercent = (priceChange / prediction.currentPrice) * 100
+    const priceChangePercent =
+      (priceChange / prediction.currentPrice) * 100 || 0
     const isPositive = priceChange >= 0
+
+    const {
+      rsi,
+      macd,
+      sma20,
+      sma50,
+    } = prediction.technicalIndicators ?? {
+      rsi: 0,
+      macd: 0,
+      sma20: 0,
+      sma50: 0,
+    }
 
     return (
       <div className="space-y-6">
@@ -84,7 +110,9 @@ const PredictionWidget: React.FC = () => {
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <Brain className="h-5 w-5 text-primary-600" />
-            <span className="text-sm font-medium text-gray-600">AI Prediction</span>
+            <span className="text-sm font-medium text-gray-600">
+              AI Prediction
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -103,19 +131,23 @@ const PredictionWidget: React.FC = () => {
                 <TrendingDown className="h-4 w-4" />
               )}
               <span className="font-medium">
-                {isPositive ? '+' : ''}₹{priceChange.toFixed(2)}
+                {isPositive ? '+' : ''}
+                ₹{priceChange.toFixed(2)}
               </span>
               <span className="text-sm">
-                ({isPositive ? '+' : ''}{priceChangePercent.toFixed(2)}%)
+                ({isPositive ? '+' : ''}
+                {priceChangePercent.toFixed(2)}%)
               </span>
             </div>
           </div>
         </div>
 
-        {/* Confidence Score */}
+        {/* Confidence */}
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Confidence</span>
+            <span className="text-sm font-medium text-gray-700">
+              Confidence
+            </span>
             <span className="text-sm font-bold text-primary-600">
               {prediction.confidence.toFixed(1)}%
             </span>
@@ -134,34 +166,31 @@ const PredictionWidget: React.FC = () => {
           <p className="text-sm text-gray-700">{prediction.analysis}</p>
         </div>
 
-        {/* Technical Indicators */}
+        {/* Indicators */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-600 mb-1">RSI</div>
-            <div className="font-medium">{prediction.technicalIndicators.rsi.toFixed(1)}</div>
+            <div className="font-medium">{rsi.toFixed(1)}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-600 mb-1">MACD</div>
-            <div className="font-medium">{prediction.technicalIndicators.macd.toFixed(2)}</div>
+            <div className="font-medium">{macd.toFixed(2)}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-600 mb-1">SMA 20</div>
-            <div className="font-medium">
-              ₹{prediction.technicalIndicators.sma20.toFixed(2)}
-            </div>
+            <div className="font-medium">₹{sma20.toFixed(2)}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-600 mb-1">SMA 50</div>
-            <div className="font-medium">
-              ₹{prediction.technicalIndicators.sma50.toFixed(2)}
-            </div>
+            <div className="font-medium">₹{sma50.toFixed(2)}</div>
           </div>
         </div>
 
-        {/* Last Updated */}
+        {/* Last updated */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Prediction generated at {new Date().toLocaleTimeString()}
+            Prediction generated at{' '}
+            {new Date(prediction.timestamp || Date.now()).toLocaleTimeString()}
           </p>
           <button
             onClick={fetchPrediction}
@@ -186,7 +215,9 @@ const PredictionWidget: React.FC = () => {
         </div>
         <div>
           <h3 className="font-bold text-gray-900">Daily Prediction</h3>
-          <p className="text-sm text-gray-600">AI-powered stock forecast</p>
+          <p className="text-sm text-gray-600">
+            AI-powered stock forecast based on technicals
+          </p>
         </div>
       </div>
 
