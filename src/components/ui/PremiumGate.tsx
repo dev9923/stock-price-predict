@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Crown, Zap } from 'lucide-react' // Removed Lock, TrendingUp
+import { Crown, Zap } from 'lucide-react'
 import { subscriptionService } from '../../services/subscriptionService'
 
 interface PremiumGateProps {
@@ -9,7 +9,11 @@ interface PremiumGateProps {
   className?: string
 }
 
-const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, className = '' }) => {
+const PremiumGate: React.FC<PremiumGateProps> = ({
+  children,
+  feature,
+  className = '',
+}) => {
   const hasPremiumAccess = subscriptionService.hasPremiumAccess()
 
   if (hasPremiumAccess) {
@@ -19,7 +23,7 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, className 
   return (
     <div className={`relative ${className}`}>
       {/* Blurred content */}
-      <div className="filter blur-sm pointer-events-none opacity-50">
+      <div className="filter blur-sm pointer-events-none opacity-50" aria-hidden="true">
         {children}
       </div>
 
@@ -27,9 +31,10 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, className 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="absolute inset-0 bg-gradient-to-br from-primary-500/90 to-secondary-500/90 backdrop-blur-sm rounded-lg flex items-center justify-center"
+        transition={{ duration: 0.4 }}
+        className="absolute inset-0 bg-gradient-to-br from-primary-500/90 to-secondary-500/90 backdrop-blur-sm rounded-lg flex items-center justify-center z-10"
       >
-        <div className="text-center text-white p-8">
+        <div className="text-center text-white p-8 max-w-md">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -46,6 +51,7 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, className 
             <button
               onClick={() => window.location.href = '/pricing'}
               className="px-6 py-2 bg-white text-primary-600 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-2"
+              aria-label="Upgrade to premium"
             >
               <Zap className="h-4 w-4" />
               <span>Upgrade Now</span>
@@ -53,6 +59,7 @@ const PremiumGate: React.FC<PremiumGateProps> = ({ children, feature, className 
             <button
               onClick={() => window.location.href = '/pricing'}
               className="px-6 py-2 border border-white/30 text-white rounded-lg font-medium hover:bg-white/10 transition-colors"
+              aria-label="Learn more about premium"
             >
               Learn More
             </button>
