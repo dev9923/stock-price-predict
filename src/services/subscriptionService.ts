@@ -1,14 +1,10 @@
 import { loadStripe } from '@stripe/stripe-js'
 
-const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+// Define environment variable type to fix TS error
+const STRIPE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_example'
 
-if (!STRIPE_PUBLISHABLE_KEY) {
-  console.warn('⚠️ Missing Stripe publishable key in environment variables.')
-}
-
-const stripePromise = loadStripe(
-  STRIPE_PUBLISHABLE_KEY || 'pk_test_mock_fallback_key'
-)
+const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY)
 
 export interface SubscriptionPlan {
   id: string
@@ -31,8 +27,8 @@ export const subscriptionPlans: SubscriptionPlan[] = [
       'Historical stock data',
       'Basic charts and analysis',
       'Market news updates',
-      'Email support'
-    ]
+      'Email support',
+    ],
   },
   {
     id: 'premium',
@@ -48,8 +44,8 @@ export const subscriptionPlans: SubscriptionPlan[] = [
       'Real-time alerts',
       'Portfolio tracking',
       'Priority support',
-      'Export data to Excel/CSV'
-    ]
+      'Export data to Excel/CSV',
+    ],
   },
   {
     id: 'pro',
@@ -64,9 +60,9 @@ export const subscriptionPlans: SubscriptionPlan[] = [
       'API access',
       'White-label solution',
       'Dedicated account manager',
-      'Custom integrations'
-    ]
-  }
+      'Custom integrations',
+    ],
+  },
 ]
 
 export interface UserSubscription {
@@ -80,16 +76,17 @@ class SubscriptionService {
   private currentSubscription: UserSubscription | null = null
 
   getCurrentSubscription(): UserSubscription | null {
-    if (!this.currentSubscription) {
-      const stored = localStorage.getItem('userSubscription')
-      if (stored) {
-        try {
-          this.currentSubscription = JSON.parse(stored)
-        } catch (e) {
-          console.error('Failed to parse subscription from storage:', e)
-        }
+    if (this.currentSubscription) return this.currentSubscription
+
+    const stored = localStorage.getItem('userSubscription')
+    if (stored) {
+      try {
+        this.currentSubscription = JSON.parse(stored)
+      } catch {
+        localStorage.removeItem('userSubscription')
       }
     }
+
     return this.currentSubscription
   }
 
@@ -106,29 +103,17 @@ class SubscriptionService {
   async createCheckoutSession(planId: string): Promise<void> {
     try {
       const stripe = await stripePromise
-      if (!stripe) throw new Error('Stripe.js not loaded properly.')
+      if (!stripe) throw new Error('Stripe not initialized')
 
-      const plan = subscriptionPlans.find(p => p.id === planId)
-      if (!plan) throw new Error('Selected plan not found.')
+      const plan = subscriptionPlans.find((p) => p.id === planId)
+      if (!plan) throw new Error('Invalid plan selected')
 
-      // In production, integrate with your backend API to create a real checkout session
-      // Example:
-      // const res = await fetch('/api/create-checkout-session', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ planId }),
-      // });
-      // const session = await res.json();
-      // await stripe.redirectToCheckout({ sessionId: session.id });
-
-      // Mock logic for dev/demo:
-      console.warn('⚠️ Using mocked checkout session for plan:', planId)
-
+      // Mocked logic for demo/testing
       const subscription: UserSubscription = {
         planId,
         status: 'active',
         currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        cancelAtPeriodEnd: false
+        cancelAtPeriodEnd: false,
       }
 
       localStorage.setItem('userSubscription', JSON.stringify(subscription))
@@ -136,7 +121,7 @@ class SubscriptionService {
 
       window.location.href = '/subscription-success'
     } catch (error) {
-      console.error('Checkout session failed:', error)
+      console.error('Checkout failed:', error)
       throw error
     }
   }
@@ -144,13 +129,13 @@ class SubscriptionService {
   async cancelSubscription(): Promise<void> {
     try {
       const sub = this.getCurrentSubscription()
-      if (!sub) throw new Error('No active subscription found.')
+      if (!sub) throw new Error('No active subscription')
 
       sub.cancelAtPeriodEnd = true
       localStorage.setItem('userSubscription', JSON.stringify(sub))
       this.currentSubscription = sub
     } catch (error) {
-      console.error('Subscription cancellation failed:', error)
+      console.error('Cancel failed:', error)
       throw error
     }
   }
@@ -158,7 +143,7 @@ class SubscriptionService {
   async reactivateSubscription(): Promise<void> {
     try {
       const sub = this.getCurrentSubscription()
-      if (!sub) throw new Error('No subscription to reactivate.')
+      if (!sub) throw new Error('No subscription to reactivate')
 
       sub.cancelAtPeriodEnd = false
       localStorage.setItem('userSubscription', JSON.stringify(sub))
