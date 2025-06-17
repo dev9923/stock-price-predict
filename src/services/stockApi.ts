@@ -1,7 +1,4 @@
-import axios from 'axios'
-
-// Mock API service - In production, you would use real stock APIs like Alpha Vantage, Yahoo Finance, etc.
-const API_BASE_URL = 'https://api.example.com' // Replace with actual API
+// Mock API service - Replace with real APIs in production
 
 export interface StockData {
   date: string
@@ -41,7 +38,7 @@ export interface MarketNewsItem {
   publishedAt: string
 }
 
-// Mock data generator for demonstration
+// Mock stock data generator
 const generateMockStockData = (days: number = 30): StockData[] => {
   const data: StockData[] = []
   const basePrice = 45 + Math.random() * 10
@@ -58,7 +55,7 @@ const generateMockStockData = (days: number = 30): StockData[] => {
     const close = Math.max(0.1, currentPrice + change)
     const high = Math.max(open, close) * (1 + Math.random() * 0.02)
     const low = Math.min(open, close) * (1 - Math.random() * 0.02)
-    const volume = Math.floor(1000000 + Math.random() * 5000000)
+    const volume = Math.floor(1_000_000 + Math.random() * 5_000_000)
 
     data.push({
       date: date.toISOString().split('T')[0],
@@ -66,7 +63,7 @@ const generateMockStockData = (days: number = 30): StockData[] => {
       high: Number(high.toFixed(2)),
       low: Number(low.toFixed(2)),
       close: Number(close.toFixed(2)),
-      volume
+      volume,
     })
 
     currentPrice = close
@@ -75,31 +72,49 @@ const generateMockStockData = (days: number = 30): StockData[] => {
   return data
 }
 
-const generateMockNews = (): MarketNewsItem[] => {
-  return [
-    {
-      title: 'Market rallies on strong earnings reports',
-      summary: 'Tech and financial stocks led gains as major indices surged.',
-      url: 'https://example.com/market-news-1',
-      source: 'Reuters',
-      publishedAt: new Date().toISOString()
+// Mock news generator
+const generateMockNews = (): MarketNewsItem[] => [
+  {
+    title: 'Market rallies on strong earnings reports',
+    summary: 'Tech and financial stocks led gains as major indices surged.',
+    url: 'https://example.com/market-news-1',
+    source: 'Reuters',
+    publishedAt: new Date().toISOString(),
+  },
+  {
+    title: 'Oil prices dip amid global demand concerns',
+    summary: 'Crude oil saw a slight pullback as economic data pointed to slowing growth.',
+    url: 'https://example.com/market-news-2',
+    source: 'Bloomberg',
+    publishedAt: new Date().toISOString(),
+  },
+]
+
+// Mock prediction generator
+const generateMockPrediction = (): PredictionResult => ({
+  currentPrice: 46.25,
+  predictedPrice: 48.60,
+  confidence: 0.85,
+  trend: 'up',
+  analysis: 'Yes Bank is expected to rise due to strong earnings and technical momentum.',
+  technicalIndicators: {
+    rsi: 65,
+    macd: 1.2,
+    sma20: 45.5,
+    sma50: 44.8,
+    bollinger: {
+      upper: 49.2,
+      middle: 45.8,
+      lower: 42.4,
     },
-    {
-      title: 'Oil prices dip amid global demand concerns',
-      summary: 'Crude oil saw a slight pullback as economic data pointed to slowing growth.',
-      url: 'https://example.com/market-news-2',
-      source: 'Bloomberg',
-      publishedAt: new Date().toISOString()
-    }
-  ]
-}
+  },
+})
 
 export const stockApi = {
   // Get historical stock data
-  getHistoricalData: async (symbol: string = 'YESBANK', period: string = '1M'): Promise<StockData[]> => {
+  getHistoricalData: async (): Promise<StockData[]> => {
     try {
-      // const response = await axios.get(`${API_BASE_URL}/historical/${symbol}?period=${period}`)
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate API delay
       return generateMockStockData(30)
     } catch (error) {
       console.error('Error fetching historical data:', error)
@@ -108,10 +123,9 @@ export const stockApi = {
   },
 
   // Get current stock price
-  getCurrentPrice: async (symbol: string = 'YESBANK'): Promise<number> => {
+  getCurrentPrice: async (): Promise<number> => {
     try {
-      // const response = await axios.get(`${API_BASE_URL}/current/${symbol}`)
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500))
       return 45.67 + (Math.random() - 0.5) * 5
     } catch (error) {
       console.error('Error fetching current price:', error)
@@ -119,15 +133,25 @@ export const stockApi = {
     }
   },
 
-  // ✅ NEW: Get market news
+  // Get prediction data
+  getPrediction: async (): Promise<PredictionResult> => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      return generateMockPrediction()
+    } catch (error) {
+      console.error('Error fetching prediction:', error)
+      return generateMockPrediction()
+    }
+  },
+
+  // Get market news
   getMarketNews: async (): Promise<MarketNewsItem[]> => {
     try {
-      // const response = await axios.get(`${API_BASE_URL}/market-news`)
-      await new Promise(resolve => setTimeout(resolve, 500)) // Simulate delay
+      await new Promise((resolve) => setTimeout(resolve, 500))
       return generateMockNews()
     } catch (error) {
       console.error('Error fetching market news:', error)
       return generateMockNews()
     }
-  }
+  },
 }
