@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, TrendingUp } from 'lucide-react'
+import { Menu, X, TrendingUp, Crown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { subscriptionService } from '../../services/subscriptionService'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,11 +19,15 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Home', path: '/' },
+    { name: 'Dashboard', path: '/dashboard' },
     { name: 'About', path: '/about' },
     { name: 'Methodology', path: '/methodology' },
     { name: 'Results', path: '/results' },
     { name: 'Contact', path: '/contact' },
   ]
+
+  const subscription = subscriptionService.getCurrentSubscription()
+  const hasPremium = subscriptionService.hasPremiumAccess()
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${
@@ -56,6 +61,24 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Subscription Status / Pricing Link */}
+            {hasPremium ? (
+              <div className="flex items-center space-x-2 px-3 py-2 bg-primary-100 rounded-lg">
+                <Crown className="h-4 w-4 text-primary-600" />
+                <span className="text-sm font-medium text-primary-700">
+                  {subscription?.planId === 'pro' ? 'Pro' : 'Premium'}
+                </span>
+              </div>
+            ) : (
+              <Link
+                to="/pricing"
+                className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                <Crown className="h-4 w-4" />
+                <span className="font-medium">Upgrade</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -100,6 +123,32 @@ const Navbar = () => {
                   </Link>
                 </motion.div>
               ))}
+              
+              {/* Mobile Subscription Link */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: navItems.length * 0.1 }}
+                className="mt-4 pt-4 border-t border-gray-200"
+              >
+                {hasPremium ? (
+                  <div className="flex items-center space-x-2 px-4 py-3 bg-primary-50 rounded-lg">
+                    <Crown className="h-4 w-4 text-primary-600" />
+                    <span className="font-medium text-primary-700">
+                      {subscription?.planId === 'pro' ? 'Pro Plan' : 'Premium Plan'}
+                    </span>
+                  </div>
+                ) : (
+                  <Link
+                    to="/pricing"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center space-x-2 px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    <Crown className="h-4 w-4" />
+                    <span className="font-medium">Upgrade to Premium</span>
+                  </Link>
+                )}
+              </motion.div>
             </div>
           </motion.div>
         )}

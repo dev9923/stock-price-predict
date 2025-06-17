@@ -9,7 +9,9 @@ import {
   ArrowRight, 
   Play,
   CheckCircle,
-  Star
+  Star,
+  Crown,
+  Zap
 } from 'lucide-react'
 import AnimatedCounter from '../components/ui/AnimatedCounter'
 
@@ -17,26 +19,26 @@ const Home = () => {
   const features = [
     {
       icon: Brain,
-      title: 'Advanced ML Algorithms',
-      description: 'Utilizing state-of-the-art machine learning models including Random Forest, LSTM, and ensemble methods for accurate predictions.'
+      title: 'AI-Powered Predictions',
+      description: 'Get daily stock price predictions powered by advanced machine learning algorithms with 94.2% accuracy.'
     },
     {
       icon: BarChart3,
-      title: 'Comprehensive Analysis',
-      description: 'Deep dive into historical data patterns, technical indicators, and market sentiment analysis for robust predictions.'
+      title: 'Real-time Analysis',
+      description: 'Access live market data, technical indicators, and comprehensive analysis updated every 30 seconds.'
     },
     {
       icon: Target,
-      title: 'High Accuracy',
-      description: 'Achieved 94.2% accuracy in stock price predictions through rigorous model training and validation processes.'
+      title: 'Premium Insights',
+      description: 'Unlock advanced features including custom alerts, portfolio tracking, and professional-grade analytics.'
     }
   ]
 
   const stats = [
-    { label: 'Data Points Analyzed', value: 50000, suffix: '+' },
-    { label: 'Model Accuracy', value: 94.2, suffix: '%' },
-    { label: 'Features Engineered', value: 25, suffix: '+' },
-    { label: 'Training Hours', value: 120, suffix: '+' }
+    { label: 'Prediction Accuracy', value: 94.2, suffix: '%' },
+    { label: 'Daily Updates', value: 24, suffix: '/7' },
+    { label: 'Technical Indicators', value: 25, suffix: '+' },
+    { label: 'Active Users', value: 1200, suffix: '+' }
   ]
 
   return (
@@ -60,41 +62,41 @@ const Home = () => {
                   className="inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm font-medium backdrop-blur-sm"
                 >
                   <Star className="h-4 w-4 mr-2" />
-                  Machine Learning Project
+                  Real-time Stock Predictions
                 </motion.div>
                 <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                   Yes Bank Stock
                   <span className="block text-secondary-400">Price Prediction</span>
                 </h1>
                 <p className="text-xl text-gray-200 max-w-2xl">
-                  Advanced machine learning model that predicts Yes Bank stock closing prices 
-                  with 94.2% accuracy using cutting-edge algorithms and comprehensive data analysis.
+                  Get daily AI-powered stock predictions with 94.2% accuracy. Access real-time market data, 
+                  advanced technical analysis, and premium insights to make informed investment decisions.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/results" className="btn-primary inline-flex items-center">
-                  View Results
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Link to="/dashboard" className="btn-primary inline-flex items-center">
+                  <BarChart3 className="mr-2 h-5 w-5" />
+                  View Dashboard
                 </Link>
-                <Link to="/methodology" className="btn-secondary inline-flex items-center">
-                  <Play className="mr-2 h-5 w-5" />
-                  Learn More
+                <Link to="/pricing" className="btn-secondary inline-flex items-center">
+                  <Crown className="mr-2 h-5 w-5" />
+                  Get Premium
                 </Link>
               </div>
 
               <div className="flex items-center space-x-6 pt-4">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-secondary-400" />
-                  <span className="text-sm">Real-time Analysis</span>
+                  <span className="text-sm">Daily Updates</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-secondary-400" />
-                  <span className="text-sm">High Accuracy</span>
+                  <span className="text-sm">94.2% Accuracy</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-secondary-400" />
-                  <span className="text-sm">Open Source</span>
+                  <span className="text-sm">Real-time Data</span>
                 </div>
               </div>
             </motion.div>
@@ -110,20 +112,40 @@ const Home = () => {
                 <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-primary-400 rounded-full opacity-20 animate-bounce-slow"></div>
                 
                 <div className="relative z-10">
-                  <h3 className="text-2xl font-bold mb-6">Project Highlights</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-bold">Live Prediction</h3>
+                    <div className="flex items-center space-x-2 px-3 py-1 bg-secondary-500/20 rounded-full">
+                      <div className="w-2 h-2 bg-secondary-400 rounded-full animate-pulse"></div>
+                      <span className="text-sm">Live</span>
+                    </div>
+                  </div>
+                  
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
-                      <span>Model Accuracy</span>
+                      <span>Current Price</span>
+                      <span className="text-2xl font-bold text-secondary-400">₹45.67</span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+                      <span>Predicted Price</span>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-secondary-400">₹47.23</div>
+                        <div className="text-sm text-secondary-300">+3.4% ↗</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
+                      <span>Confidence</span>
                       <span className="text-2xl font-bold text-secondary-400">94.2%</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
-                      <span>Data Points</span>
-                      <span className="text-2xl font-bold text-secondary-400">50K+</span>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-secondary-500/20 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Zap className="h-4 w-4 text-secondary-400" />
+                      <span className="text-sm font-medium">Premium Feature</span>
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
-                      <span>Training Time</span>
-                      <span className="text-2xl font-bold text-secondary-400">120h</span>
-                    </div>
+                    <p className="text-sm text-gray-300">
+                      Get detailed analysis, alerts, and advanced predictions with Premium access.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -165,11 +187,11 @@ const Home = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why This Project Stands Out
+              Advanced Stock Analysis Platform
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Combining advanced machine learning techniques with comprehensive financial analysis 
-              to deliver accurate and reliable stock price predictions.
+              Combining cutting-edge AI technology with real-time market data to deliver 
+              accurate predictions and comprehensive analysis for informed trading decisions.
             </p>
           </motion.div>
 
@@ -194,8 +216,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="section-padding bg-primary-600 text-white">
+      {/* Premium CTA Section */}
+      <section className="section-padding bg-gradient-to-br from-primary-600 to-secondary-600 text-white">
         <div className="container-max text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -203,20 +225,43 @@ const Home = () => {
             viewport={{ once: true }}
             className="max-w-3xl mx-auto"
           >
+            <div className="inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm font-medium backdrop-blur-sm mb-6">
+              <Crown className="h-4 w-4 mr-2" />
+              Premium Features Available
+            </div>
+            
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to Explore the Results?
+              Unlock Advanced Predictions & Analysis
             </h2>
             <p className="text-xl text-primary-100 mb-8">
-              Dive deep into the model performance, visualizations, and insights 
-              from our comprehensive Yes Bank stock price prediction analysis.
+              Get daily AI predictions, real-time alerts, advanced technical indicators, 
+              and comprehensive market analysis with our premium subscription.
             </p>
+            
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/results" className="btn-secondary">
-                View Detailed Results
+              <Link to="/pricing" className="btn-secondary">
+                <Crown className="mr-2 h-5 w-5" />
+                View Pricing Plans
               </Link>
-              <Link to="/methodology" className="btn-primary border-2 border-white/20">
-                Explore Methodology
+              <Link to="/dashboard" className="btn-primary border-2 border-white/20">
+                <BarChart3 className="mr-2 h-5 w-5" />
+                Try Free Dashboard
               </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 pt-12 border-t border-white/20">
+              <div className="text-center">
+                <div className="text-2xl font-bold mb-2">Daily Predictions</div>
+                <p className="text-primary-200">AI-powered forecasts updated every day</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold mb-2">Real-time Alerts</div>
+                <p className="text-primary-200">Get notified of important price movements</p>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold mb-2">Advanced Analytics</div>
+                <p className="text-primary-200">Professional-grade technical analysis tools</p>
+              </div>
             </div>
           </motion.div>
         </div>

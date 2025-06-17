@@ -17,7 +17,14 @@
     "recharts": "^2.8.0",
     "lucide-react": "^0.294.0",
     "@headlessui/react": "^1.7.17",
-    "clsx": "^2.0.0"
+    "clsx": "^2.0.0",
+    "axios": "^1.6.2",
+    "date-fns": "^2.30.0",
+    "react-query": "^3.39.3",
+    "react-hot-toast": "^2.4.1",
+    "stripe": "^14.7.0",
+    "@stripe/stripe-js": "^2.2.0",
+    "react-stripe-js": "^2.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
