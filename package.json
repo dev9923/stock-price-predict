@@ -23,8 +23,7 @@
     "react-query": "^3.39.3",
     "react-hot-toast": "^2.4.1",
     "stripe": "^14.7.0",
-    "@stripe/stripe-js": "^2.2.0",
-    "react-stripe-js": "^2.4.0"
+    "@stripe/stripe-js": "^2.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
