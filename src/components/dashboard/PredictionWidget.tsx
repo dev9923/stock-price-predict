@@ -7,10 +7,15 @@ import {
   Target,
   AlertCircle,
 } from 'lucide-react'
-import { stockApi, PredictionResult } from '../../services/stockApi'
+import { stockApi, PredictionResult as OriginalPredictionResult } from '../../services/stockApi'
 import { subscriptionService } from '../../services/subscriptionService'
 import PremiumGate from '../ui/PremiumGate'
 import LoadingSpinner from '../ui/LoadingSpinner'
+
+// Extend PredictionResult to include timestamp (if not already defined)
+interface PredictionResult extends OriginalPredictionResult {
+  timestamp?: string | number
+}
 
 const PredictionWidget: React.FC = () => {
   const [prediction, setPrediction] = useState<PredictionResult | null>(null)
@@ -52,7 +57,7 @@ const PredictionWidget: React.FC = () => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center py-8">
-          <LoadingSpinner size="lg" />
+          <LoadingSpinner />
         </div>
       )
     }
