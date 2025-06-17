@@ -1,4 +1,3 @@
-import React from 'react'
 import { motion } from 'framer-motion'
 import { 
   Database, 
@@ -6,7 +5,6 @@ import {
   Brain, 
   BarChart3, 
   CheckCircle, 
-  ArrowRight,
   Code,
   Target,
   TrendingUp,
