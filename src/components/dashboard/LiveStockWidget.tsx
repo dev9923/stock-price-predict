@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, RefreshCw, Activity } from 'lucide-react'
 import { stockApi } from '../../services/stockApi'
 
 const LiveStockWidget: React.FC = () => {
-  const [currentPrice, setCurrentPrice] = useState<number | null>(null)
-  const [previousPrice, setPreviousPrice] = useState<number | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [currentPrice, setCurrentPrice] = React.useState<number | null>(null)
+  const [previousPrice, setPreviousPrice] = React.useState<number | null>(null)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [lastUpdated, setLastUpdated] = React.useState<Date | null>(null)
 
   const fetchCurrentPrice = async () => {
     setIsLoading(true)
@@ -23,12 +23,10 @@ const LiveStockWidget: React.FC = () => {
     }
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchCurrentPrice()
-    
-    // Update every 30 seconds
+
     const interval = setInterval(fetchCurrentPrice, 30000)
-    
     return () => clearInterval(interval)
   }, [])
 
@@ -52,7 +50,7 @@ const LiveStockWidget: React.FC = () => {
             <p className="text-sm text-gray-600">YESBANK</p>
           </div>
         </div>
-        
+
         <button
           onClick={fetchCurrentPrice}
           disabled={isLoading}
@@ -68,9 +66,11 @@ const LiveStockWidget: React.FC = () => {
             ₹{currentPrice?.toFixed(2) || '--'}
           </span>
           {priceChange !== 0 && (
-            <div className={`flex items-center space-x-1 ${
-              isPositive ? 'text-secondary-600' : 'text-red-600'
-            }`}>
+            <div
+              className={`flex items-center space-x-1 ${
+                isPositive ? 'text-secondary-600' : 'text-red-600'
+              }`}
+            >
               {isPositive ? (
                 <TrendingUp className="h-4 w-4" />
               ) : (
@@ -85,7 +85,7 @@ const LiveStockWidget: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {lastUpdated && (
           <p className="text-xs text-gray-500">
             Last updated: {lastUpdated.toLocaleTimeString()}
@@ -97,11 +97,15 @@ const LiveStockWidget: React.FC = () => {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-xs text-gray-600">Day High</p>
-            <p className="font-medium">₹{(currentPrice ? currentPrice * 1.02 : 0).toFixed(2)}</p>
+            <p className="font-medium">
+              ₹{(currentPrice ? currentPrice * 1.02 : 0).toFixed(2)}
+            </p>
           </div>
           <div>
             <p className="text-xs text-gray-600">Day Low</p>
-            <p className="font-medium">₹{(currentPrice ? currentPrice * 0.98 : 0).toFixed(2)}</p>
+            <p className="font-medium">
+              ₹{(currentPrice ? currentPrice * 0.98 : 0).toFixed(2)}
+            </p>
           </div>
           <div>
             <p className="text-xs text-gray-600">Volume</p>
