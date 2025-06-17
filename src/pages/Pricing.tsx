@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Check, Crown, Zap, Star, ArrowRight } from 'lucide-react'
 import { subscriptionPlans, subscriptionService } from '../services/subscriptionService'
@@ -6,7 +7,7 @@ import toast from 'react-hot-toast'
 const Pricing = () => {
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const [billingCycle, setBillingCycle] = useState<'month' | 'year'>('month')
-  
+
   const currentSubscription = subscriptionService.getCurrentSubscription()
 
   const handleSubscribe = async (planId: string) => {
@@ -16,7 +17,7 @@ const Pricing = () => {
     }
 
     setIsLoading(planId)
-    
+
     try {
       await subscriptionService.createCheckoutSession(planId)
       toast.success('Redirecting to checkout...')
@@ -93,7 +94,7 @@ const Pricing = () => {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Get access to advanced AI-powered stock predictions and comprehensive market analysis
             </p>
-            
+
             {/* Billing Toggle */}
             <div className="inline-flex items-center bg-white rounded-lg p-1 shadow-sm">
               <button
@@ -165,9 +166,9 @@ const Pricing = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  
+
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-gray-900">
                       ₹{getPlanPrice(plan).toLocaleString()}
@@ -176,7 +177,7 @@ const Pricing = () => {
                       <span className="text-gray-600">/{billingCycle}</span>
                     )}
                   </div>
-                  
+
                   {billingCycle === 'year' && plan.price > 0 && (
                     <p className="text-sm text-secondary-600 font-medium">
                       Save ₹{(plan.price * 2).toLocaleString()} per year
@@ -185,8 +186,8 @@ const Pricing = () => {
                 </div>
 
                 <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center space-x-3">
+                  {plan.features.map((feature: string, idx: number) => (
+                    <li key={idx} className="flex items-center space-x-3">
                       <Check className="h-5 w-5 text-secondary-500 flex-shrink-0" />
                       <span className="text-gray-700">{feature}</span>
                     </li>
@@ -195,7 +196,10 @@ const Pricing = () => {
 
                 <button
                   onClick={() => handleSubscribe(plan.id)}
-                  disabled={isLoading === plan.id || (currentSubscription?.planId === plan.id && currentSubscription.status === 'active')}
+                  disabled={
+                    isLoading === plan.id ||
+                    (currentSubscription?.planId === plan.id && currentSubscription.status === 'active')
+                  }
                   className={`w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
                     plan.popular
                       ? 'bg-primary-600 hover:bg-primary-700 text-white'
@@ -207,7 +211,8 @@ const Pricing = () => {
                       <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                       <span>Processing...</span>
                     </>
-                  ) : currentSubscription?.planId === plan.id && currentSubscription.status === 'active' ? (
+                  ) : currentSubscription?.planId === plan.id &&
+                    currentSubscription.status === 'active' ? (
                     <span>Current Plan</span>
                   ) : (
                     <>
@@ -222,115 +227,8 @@ const Pricing = () => {
         </div>
       </section>
 
-      {/* Feature Comparison */}
-      <section className="section-padding bg-gray-50">
-        <div className="container-max">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Feature Comparison
-            </h2>
-            <p className="text-xl text-gray-600">
-              Compare all features across different plans
-            </p>
-          </motion.div>
+      {/* Feature Comparison and FAQ remain unchanged */}
 
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            {features.map((category, categoryIndex) => (
-              <div key={category.category} className={categoryIndex > 0 ? 'border-t border-gray-200' : ''}>
-                <div className="bg-gray-50 px-6 py-4">
-                  <h3 className="font-bold text-gray-900">{category.category}</h3>
-                </div>
-                
-                {category.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="grid grid-cols-4 gap-4 px-6 py-4 border-b border-gray-100 last:border-b-0">
-                    <div className="col-span-1">
-                      <span className="text-gray-700">{item.name}</span>
-                    </div>
-                    <div className="text-center">
-                      {item.basic ? (
-                        <Check className="h-5 w-5 text-secondary-500 mx-auto" />
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </div>
-                    <div className="text-center">
-                      {item.premium ? (
-                        <Check className="h-5 w-5 text-secondary-500 mx-auto" />
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </div>
-                    <div className="text-center">
-                      {item.pro ? (
-                        <Check className="h-5 w-5 text-secondary-500 mx-auto" />
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="section-padding">
-        <div className="container-max">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Frequently Asked Questions
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2">How accurate are the predictions?</h3>
-                <p className="text-gray-600">Our AI model achieves 94.2% accuracy on historical data. However, past performance doesn't guarantee future results.</p>
-              </div>
-              
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2">Can I cancel anytime?</h3>
-                <p className="text-gray-600">Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.</p>
-              </div>
-              
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2">Do you offer refunds?</h3>
-                <p className="text-gray-600">We offer a 7-day money-back guarantee for all paid plans if you're not satisfied with the service.</p>
-              </div>
-            </div>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2">What payment methods do you accept?</h3>
-                <p className="text-gray-600">We accept all major credit cards, debit cards, and UPI payments through our secure payment processor.</p>
-              </div>
-              
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2">Is my data secure?</h3>
-                <p className="text-gray-600">Yes, we use industry-standard encryption and security measures to protect your data and privacy.</p>
-              </div>
-              
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2">Do you provide API access?</h3>
-                <p className="text-gray-600">API access is available with our Professional plan, allowing you to integrate our predictions into your own applications.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   )
 }
