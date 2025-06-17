@@ -1,14 +1,9 @@
 import { motion } from 'framer-motion'
 import {
-  User,
-  GraduationCap,
-  Code,
   Target,
-  Lightbulb,
-  TrendingUp,
-  Database,
   Brain,
   BarChart3,
+  Database,
   LucideIcon
 } from 'lucide-react'
 
@@ -23,36 +18,47 @@ const About: React.FC = () => {
     {
       icon: Target,
       title: 'Accurate Prediction',
-      description: 'Develop a machine learning model that can predict Yes Bank stock closing prices with high accuracy.',
+      description:
+        'Develop a machine learning model that can predict Yes Bank stock closing prices with high accuracy.',
     },
     {
       icon: Brain,
       title: 'Algorithm Comparison',
-      description: 'Compare different ML algorithms to identify the best performing model for stock price prediction.',
+      description:
+        'Compare different ML algorithms to identify the best performing model for stock price prediction.',
     },
     {
       icon: BarChart3,
       title: 'Market Analysis',
-      description: 'Analyze historical market data and identify key patterns that influence stock price movements.',
+      description:
+        'Analyze historical market data and identify key patterns that influence stock price movements.',
     },
     {
       icon: Database,
       title: 'Data Engineering',
-      description: 'Implement robust data preprocessing and feature engineering techniques for optimal model performance.',
+      description:
+        'Implement robust data preprocessing and feature engineering techniques for optimal model performance.',
     },
   ]
 
   const technologies: string[] = [
-    'Python', 'Pandas', 'NumPy', 'Scikit-learn', 'TensorFlow', 'Matplotlib',
-    'Seaborn', 'Jupyter Notebook', 'Random Forest', 'LSTM', 'Linear Regression', 'SVM'
+    'Python',
+    'Pandas',
+    'NumPy',
+    'Scikit-learn',
+    'TensorFlow',
+    'Matplotlib',
+    'Seaborn',
+    'Jupyter Notebook',
+    'Random Forest',
+    'LSTM',
+    'Linear Regression',
+    'SVM',
   ]
 
   return (
     <div className="min-h-screen pt-20">
-      {/* Sections are unchanged except where noted */}
-      {/* ... Keep your hero section, project overview, and technologies exactly as you have them ... */}
-
-      {/* Project Objectives (with fix to icon usage) */}
+      {/* Project Objectives */}
       <section className="section-padding bg-gray-50">
         <div className="container-max">
           <motion.div
@@ -74,7 +80,7 @@ const About: React.FC = () => {
               const Icon = objective.icon
               return (
                 <motion.div
-                  key={objective.title}
+                  key={`objective-${index}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -85,7 +91,9 @@ const About: React.FC = () => {
                     <Icon className="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{objective.title}</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      {objective.title}
+                    </h3>
                     <p className="text-gray-600">{objective.description}</p>
                   </div>
                 </motion.div>
@@ -95,7 +103,7 @@ const About: React.FC = () => {
         </div>
       </section>
 
-      {/* Developer section remains unchanged */}
+      {/* Developer/Other Sections would go here */}
     </div>
   )
 }
