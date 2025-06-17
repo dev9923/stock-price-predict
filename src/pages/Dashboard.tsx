@@ -1,3 +1,4 @@
+// src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
@@ -7,7 +8,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts'
 import { Calendar, TrendingUp, Bell, Settings } from 'lucide-react'
 
@@ -32,29 +33,23 @@ const Dashboard: React.FC = () => {
 
   const periods = ['1W', '1M', '3M', '6M', '1Y'].map((val) => ({
     label: val,
-    value: val
+    value: val,
   }))
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        // ✅ FIX: Match actual API signature for getHistoricalData
         const [historicalData, marketNews] = await Promise.all([
           stockApi.getHistoricalData({ symbol: 'YESBANK', period: selectedPeriod }),
-          stockApi.getMarketNews()
+          stockApi.getMarketNews(),
         ])
-
         setStockData(historicalData)
-
-        // ✅ FIX: Transform MarketNewsItem[] into NewsArticle[]
         setNews(
-          marketNews.map((item: any) => ({
-            id: item.id,
-            title: item.title,
-            summary: item.summary,
-            timestamp: item.timestamp ?? Date.now(),
-            sentiment: item.sentiment ?? 'neutral'
+          marketNews.map((article) => ({
+            ...article,
+            timestamp: article.timestamp || new Date().toISOString(),
+            sentiment: article.sentiment || 'neutral',
           }))
         )
       } catch (error) {
@@ -72,26 +67,17 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
       <div className="container-max py-16">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Stock Dashboard</h1>
               <p className="text-gray-600">Real-time Yes Bank stock analysis and predictions</p>
             </div>
-
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <div className="flex items-center space-x-2 px-3 py-2 bg-white rounded-lg shadow-sm">
                 <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-700">
-                  {new Date().toLocaleDateString()}
-                </span>
+                <span className="text-sm text-gray-700">{new Date().toLocaleDateString()}</span>
               </div>
-
               {subscription?.planId && (
                 <div
                   className={`px-3 py-2 rounded-lg text-sm font-medium ${
@@ -109,9 +95,7 @@ const Dashboard: React.FC = () => {
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Price Chart */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -136,7 +120,6 @@ const Dashboard: React.FC = () => {
                   ))}
                 </div>
               </div>
-
               {isLoading ? (
                 <div className="h-80 flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -148,29 +131,20 @@ const Dashboard: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="date"
-                        tickFormatter={(val: string | number) =>
-                          new Date(val).toLocaleDateString()
-                        }
+                        tickFormatter={(val: string | number) => new Date(val).toLocaleDateString()}
                       />
                       <YAxis />
                       <Tooltip
                         labelFormatter={(val) => new Date(val as string).toLocaleDateString()}
                         formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Close Price']}
                       />
-                      <Line
-                        type="monotone"
-                        dataKey="close"
-                        stroke="#3b82f6"
-                        strokeWidth={2}
-                        dot={false}
-                      />
+                      <Line type="monotone" dataKey="close" stroke="#3b82f6" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
               )}
             </motion.div>
 
-            {/* Market News */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -212,8 +186,6 @@ const Dashboard: React.FC = () => {
           <div className="space-y-8">
             <LiveStockWidget />
             <PredictionWidget />
-
-            {/* Quick Actions */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -222,26 +194,15 @@ const Dashboard: React.FC = () => {
             >
               <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <button
-                  className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  aria-label="Set Price Alert"
-                >
+                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <Bell className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Set Price Alert</span>
                 </button>
-
-                <button
-                  className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  aria-label="View Analysis"
-                >
+                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <TrendingUp className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">View Analysis</span>
                 </button>
-
-                <button
-                  className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  aria-label="Open Settings"
-                >
+                <button className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <Settings className="h-5 w-5 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Settings</span>
                 </button>
