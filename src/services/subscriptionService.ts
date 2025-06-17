@@ -1,7 +1,13 @@
 import { loadStripe } from '@stripe/stripe-js'
 
+const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+
+if (!STRIPE_PUBLISHABLE_KEY) {
+  console.warn('⚠️ Missing Stripe publishable key in environment variables.')
+}
+
 const stripePromise = loadStripe(
-  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_example'
+  STRIPE_PUBLISHABLE_KEY || 'pk_test_mock_fallback_key'
 )
 
 export interface SubscriptionPlan {
@@ -74,9 +80,15 @@ class SubscriptionService {
   private currentSubscription: UserSubscription | null = null
 
   getCurrentSubscription(): UserSubscription | null {
-    const stored = localStorage.getItem('userSubscription')
-    if (stored) {
-      this.currentSubscription = JSON.parse(stored)
+    if (!this.currentSubscription) {
+      const stored = localStorage.getItem('userSubscription')
+      if (stored) {
+        try {
+          this.currentSubscription = JSON.parse(stored)
+        } catch (e) {
+          console.error('Failed to parse subscription from storage:', e)
+        }
+      }
     }
     return this.currentSubscription
   }
@@ -94,13 +106,13 @@ class SubscriptionService {
   async createCheckoutSession(planId: string): Promise<void> {
     try {
       const stripe = await stripePromise
-      if (!stripe) throw new Error('Stripe not initialized')
+      if (!stripe) throw new Error('Stripe.js not loaded properly.')
 
-      // 🔁 Mock logic for local testing
       const plan = subscriptionPlans.find(p => p.id === planId)
-      if (!plan) throw new Error('Invalid plan selected')
+      if (!plan) throw new Error('Selected plan not found.')
 
-      // In production, replace with call to your backend API like:
+      // In production, integrate with your backend API to create a real checkout session
+      // Example:
       // const res = await fetch('/api/create-checkout-session', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
@@ -109,7 +121,9 @@ class SubscriptionService {
       // const session = await res.json();
       // await stripe.redirectToCheckout({ sessionId: session.id });
 
-      // Mock: Simulate subscription success
+      // Mock logic for dev/demo:
+      console.warn('⚠️ Using mocked checkout session for plan:', planId)
+
       const subscription: UserSubscription = {
         planId,
         status: 'active',
@@ -122,7 +136,7 @@ class SubscriptionService {
 
       window.location.href = '/subscription-success'
     } catch (error) {
-      console.error('Checkout failed:', error)
+      console.error('Checkout session failed:', error)
       throw error
     }
   }
@@ -130,13 +144,13 @@ class SubscriptionService {
   async cancelSubscription(): Promise<void> {
     try {
       const sub = this.getCurrentSubscription()
-      if (!sub) throw new Error('No active subscription')
+      if (!sub) throw new Error('No active subscription found.')
 
       sub.cancelAtPeriodEnd = true
       localStorage.setItem('userSubscription', JSON.stringify(sub))
       this.currentSubscription = sub
     } catch (error) {
-      console.error('Cancel failed:', error)
+      console.error('Subscription cancellation failed:', error)
       throw error
     }
   }
@@ -144,7 +158,7 @@ class SubscriptionService {
   async reactivateSubscription(): Promise<void> {
     try {
       const sub = this.getCurrentSubscription()
-      if (!sub) throw new Error('No subscription to reactivate')
+      if (!sub) throw new Error('No subscription to reactivate.')
 
       sub.cancelAtPeriodEnd = false
       localStorage.setItem('userSubscription', JSON.stringify(sub))
