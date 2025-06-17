@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
-      <div className="container-max section-padding">
+      <div className="container-max py-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -80,7 +80,7 @@ const Dashboard: React.FC = () => {
                 </span>
               </div>
 
-              {subscription && (
+              {subscription?.planId && (
                 <div
                   className={`px-3 py-2 rounded-lg text-sm font-medium ${
                     ['premium', 'pro'].includes(subscription.planId)
@@ -136,12 +136,14 @@ const Dashboard: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="date"
-                        tickFormatter={(val) => new Date(val).toLocaleDateString()}
+                        tickFormatter={(val: string | number) =>
+                          new Date(val).toLocaleDateString()
+                        }
                       />
                       <YAxis />
                       <Tooltip
-                        labelFormatter={(val) => new Date(val).toLocaleDateString()}
-                        formatter={(val: number) => [`₹${val.toFixed(2)}`, 'Close Price']}
+                        labelFormatter={(val) => new Date(val as string).toLocaleDateString()}
+                        formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Close Price']}
                       />
                       <Line
                         type="monotone"
