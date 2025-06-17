@@ -13,9 +13,13 @@ const LiveStockWidget: React.FC = () => {
     setIsLoading(true)
     try {
       const price = await stockApi.getCurrentPrice()
-      setPreviousPrice(currentPrice)
-      setCurrentPrice(price)
-      setLastUpdated(new Date())
+      if (typeof price === 'number' && !isNaN(price)) {
+        setPreviousPrice(currentPrice)
+        setCurrentPrice(price)
+        setLastUpdated(new Date())
+      } else {
+        console.warn('Invalid price fetched:', price)
+      }
     } catch (error) {
       console.error('Error fetching current price:', error)
     } finally {
@@ -25,13 +29,16 @@ const LiveStockWidget: React.FC = () => {
 
   React.useEffect(() => {
     fetchCurrentPrice()
-
     const interval = setInterval(fetchCurrentPrice, 30000)
     return () => clearInterval(interval)
   }, [])
 
-  const priceChange = currentPrice && previousPrice ? currentPrice - previousPrice : 0
-  const priceChangePercent = previousPrice ? (priceChange / previousPrice) * 100 : 0
+  const priceChange =
+    currentPrice !== null && previousPrice !== null ? currentPrice - previousPrice : 0
+  const priceChangePercent =
+    previousPrice !== null && previousPrice !== 0
+      ? (priceChange / previousPrice) * 100
+      : 0
   const isPositive = priceChange >= 0
 
   return (
@@ -63,9 +70,9 @@ const LiveStockWidget: React.FC = () => {
       <div className="space-y-2">
         <div className="flex items-baseline space-x-2">
           <span className="text-3xl font-bold text-gray-900">
-            ₹{currentPrice?.toFixed(2) || '--'}
+            ₹{currentPrice !== null ? currentPrice.toFixed(2) : '--'}
           </span>
-          {priceChange !== 0 && (
+          {previousPrice !== null && priceChange !== 0 && (
             <div
               className={`flex items-center space-x-1 ${
                 isPositive ? 'text-secondary-600' : 'text-red-600'
@@ -98,13 +105,13 @@ const LiveStockWidget: React.FC = () => {
           <div>
             <p className="text-xs text-gray-600">Day High</p>
             <p className="font-medium">
-              ₹{(currentPrice ? currentPrice * 1.02 : 0).toFixed(2)}
+              ₹{currentPrice !== null ? (currentPrice * 1.02).toFixed(2) : '--'}
             </p>
           </div>
           <div>
             <p className="text-xs text-gray-600">Day Low</p>
             <p className="font-medium">
-              ₹{(currentPrice ? currentPrice * 0.98 : 0).toFixed(2)}
+              ₹{currentPrice !== null ? (currentPrice * 0.98).toFixed(2) : '--'}
             </p>
           </div>
           <div>
