@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, TrendingUp, Crown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { subscriptionService } from '../../services/subscriptionService'
+import { subscriptionService, UserSubscription } from '../../services/subscriptionService'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [hasPremium, setHasPremium] = useState(false)
-  const [subscription, setSubscription] = useState(null)
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null)
   const location = useLocation()
 
   useEffect(() => {
@@ -20,8 +19,8 @@ const Navbar = () => {
   }, [])
 
   useEffect(() => {
-    setHasPremium(subscriptionService.hasPremiumAccess())
-    setSubscription(subscriptionService.getCurrentSubscription())
+    const sub = subscriptionService.getCurrentSubscription()
+    setSubscription(sub)
   }, [])
 
   const navItems = [
@@ -33,6 +32,8 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ]
 
+  const hasPremium = subscriptionService.hasPremiumAccess()
+
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
@@ -41,7 +42,6 @@ const Navbar = () => {
     >
       <div className="container-max">
         <div className="flex justify-between items-center py-4">
-          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="p-2 bg-primary-600 rounded-lg">
               <TrendingUp className="h-6 w-6 text-white" />
@@ -75,7 +75,7 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Premium Status */}
+            {/* Subscription Status / Pricing Link */}
             {hasPremium ? (
               <div className="flex items-center space-x-2 px-3 py-2 bg-primary-100 rounded-lg">
                 <Crown className="h-4 w-4 text-primary-600" />
@@ -94,7 +94,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`md:hidden p-2 rounded-lg transition-colors ${
@@ -110,7 +110,6 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            layout
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -119,11 +118,10 @@ const Navbar = () => {
             <div className="container-max py-4">
               {navItems.map((item, index) => (
                 <motion.div
-                  layout
                   key={item.name}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.08 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   <Link
                     to={item.path}
@@ -139,12 +137,11 @@ const Navbar = () => {
                 </motion.div>
               ))}
 
-              {/* Mobile Premium Status */}
+              {/* Mobile Subscription Link */}
               <motion.div
-                layout
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: navItems.length * 0.08 }}
+                transition={{ delay: navItems.length * 0.1 }}
                 className="mt-4 pt-4 border-t border-gray-200"
               >
                 {hasPremium ? (
