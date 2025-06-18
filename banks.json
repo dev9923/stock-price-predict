@@ -1,0 +1,22 @@
+[
+  { "symbol": "HDFCBANK.BSE", "name": "HDFC Bank" },
+  { "symbol": "ICICIBANK.BSE", "name": "ICICI Bank" },
+  { "symbol": "SBIN.BSE", "name": "State Bank of India" },
+  { "symbol": "AXISBANK.BSE", "name": "Axis Bank" },
+  { "symbol": "KOTAKBANK.BSE", "name": "Kotak Mahindra Bank" },
+  { "symbol": "BANKBARODA.BSE", "name": "Bank of Baroda" },
+  { "symbol": "PNB.BSE", "name": "Punjab National Bank" },
+  { "symbol": "IDFCFIRSTB.BSE", "name": "IDFC First Bank" },
+  { "symbol": "INDUSINDBK.BSE", "name": "IndusInd Bank" },
+  { "symbol": "YESBANK.BSE", "name": "Yes Bank" },
+  { "symbol": "FEDERALBNK.BSE", "name": "Federal Bank" },
+  { "symbol": "CANBK.BSE", "name": "Canara Bank" },
+  { "symbol": "UNIONBANK.BSE", "name": "Union Bank of India" },
+  { "symbol": "IOB.BSE", "name": "Indian Overseas Bank" },
+  { "symbol": "UCOBANK.BSE", "name": "UCO Bank" },
+  { "symbol": "BANKINDIA.BSE", "name": "Bank of India" },
+  { "symbol": "DCBBANK.BSE", "name": "DCB Bank" },
+  { "symbol": "SOUTHBANK.BSE", "name": "South Indian Bank" },
+  { "symbol": "KARNATAKA.BSE", "name": "Karnataka Bank" },
+  { "symbol": "RBLBANK.BSE", "name": "RBL Bank" }
+]
