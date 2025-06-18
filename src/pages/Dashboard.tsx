@@ -1,4 +1,3 @@
-// src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
@@ -41,17 +40,23 @@ const Dashboard: React.FC = () => {
       setIsLoading(true)
       try {
         const [historicalData, marketNews] = await Promise.all([
-          stockApi.getHistoricalData({ symbol: 'YESBANK', period: selectedPeriod }),
+          stockApi.getHistoricalData(selectedPeriod), // FIXED ARG
           stockApi.getMarketNews(),
         ])
+
         setStockData(historicalData)
-        setNews(
-          marketNews.map((article) => ({
-            ...article,
-            timestamp: article.timestamp || new Date().toISOString(),
-            sentiment: article.sentiment || 'neutral',
-          }))
-        )
+
+        const safeNews = marketNews.map((article: any, index: number): NewsArticle => ({
+          id: article.id ?? index,
+          title: article.title,
+          summary: article.summary,
+          timestamp: article.timestamp ?? new Date().toISOString(),
+          sentiment: ['positive', 'neutral', 'negative'].includes(article.sentiment)
+            ? article.sentiment
+            : 'neutral',
+        }))
+
+        setNews(safeNews)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
       } finally {
@@ -138,7 +143,13 @@ const Dashboard: React.FC = () => {
                         labelFormatter={(val) => new Date(val as string).toLocaleDateString()}
                         formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Close Price']}
                       />
-                      <Line type="monotone" dataKey="close" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                      <Line
+                        type="monotone"
+                        dataKey="close"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        dot={false}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
