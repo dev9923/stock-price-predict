@@ -1,5 +1,3 @@
-// src/services/stockApi.ts
-
 export interface StockData {
   date: string
   open: number
@@ -114,13 +112,23 @@ export const stockApi = {
   /**
    * Get mock historical stock data
    */
-  getHistoricalData: async (): Promise<StockData[]> => {
+  getHistoricalData: async (period: string = '1M'): Promise<StockData[]> => {
+    const periodMap: Record<string, number> = {
+      '1W': 7,
+      '1M': 30,
+      '3M': 90,
+      '6M': 180,
+      '1Y': 365,
+    }
+
+    const days = periodMap[period] || 30
+
     try {
       await new Promise((res) => setTimeout(res, 1000))
-      return generateMockStockData(30)
+      return generateMockStockData(days)
     } catch (error) {
       console.error('Error fetching historical data:', error)
-      return generateMockStockData(30)
+      return generateMockStockData(days)
     }
   },
 
