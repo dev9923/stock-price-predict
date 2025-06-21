@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, TrendingUp, Crown } from 'lucide-react'
+import { Menu, X, TrendingUp, Crown, Brain } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { subscriptionService, UserSubscription } from '../../services/subscriptionService'
 
@@ -21,7 +21,7 @@ const Navbar = () => {
   useEffect(() => {
     const sub = subscriptionService.getCurrentSubscription()
     setSubscription(sub)
-  }, [])
+  }, [location])
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -42,17 +42,20 @@ const Navbar = () => {
     >
       <div className="container-max">
         <div className="flex justify-between items-center py-4">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="p-2 bg-primary-600 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-white" />
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
+              <Brain className="h-6 w-6 text-white" />
             </div>
-            <span
-              className={`text-xl font-bold ${
-                scrolled ? 'text-gray-900' : 'text-white'
-              }`}
-            >
-              YesBank ML
-            </span>
+            <div>
+              <span
+                className={`text-xl font-bold ${
+                  scrolled ? 'text-gray-900' : 'text-white'
+                }`}
+              >
+                StockSage Pro
+              </span>
+              <div className="text-xs text-blue-600 font-medium">AI Trading Platform</div>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -64,10 +67,10 @@ const Navbar = () => {
                 className={`font-medium transition-colors duration-200 ${
                   location.pathname === item.path
                     ? scrolled
-                      ? 'text-primary-600'
+                      ? 'text-blue-600'
                       : 'text-white'
                     : scrolled
-                    ? 'text-gray-700 hover:text-primary-600'
+                    ? 'text-gray-700 hover:text-blue-600'
                     : 'text-gray-200 hover:text-white'
                 }`}
               >
@@ -77,16 +80,18 @@ const Navbar = () => {
 
             {/* Subscription Status / Pricing Link */}
             {hasPremium ? (
-              <div className="flex items-center space-x-2 px-3 py-2 bg-primary-100 rounded-lg">
-                <Crown className="h-4 w-4 text-primary-600" />
-                <span className="text-sm font-medium text-primary-700">
-                  {subscription?.planId === 'pro' ? 'Pro' : 'Premium'}
+              <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-100 to-blue-100 rounded-xl">
+                <Crown className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-700">
+                  {subscription?.planId === 'enterprise' ? 'Enterprise' : 
+                   subscription?.planId === 'professional' ? 'Professional' : 
+                   subscription?.planId === 'premium' ? 'Premium' : 'Pro'}
                 </span>
               </div>
             ) : (
               <Link
                 to="/pricing"
-                className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
                 <Crown className="h-4 w-4" />
                 <span className="font-medium">Upgrade</span>
@@ -113,7 +118,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-gray-200"
+            className="md:hidden bg-white border-t border-gray-200 shadow-lg"
           >
             <div className="container-max py-4">
               {navItems.map((item, index) => (
@@ -128,8 +133,8 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                     className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
                       location.pathname === item.path
-                        ? 'text-primary-600 bg-primary-50'
-                        : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                     }`}
                   >
                     {item.name}
@@ -145,17 +150,19 @@ const Navbar = () => {
                 className="mt-4 pt-4 border-t border-gray-200"
               >
                 {hasPremium ? (
-                  <div className="flex items-center space-x-2 px-4 py-3 bg-primary-50 rounded-lg">
-                    <Crown className="h-4 w-4 text-primary-600" />
-                    <span className="font-medium text-primary-700">
-                      {subscription?.planId === 'pro' ? 'Pro Plan' : 'Premium Plan'}
+                  <div className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                    <Crown className="h-4 w-4 text-green-600" />
+                    <span className="font-medium text-green-700">
+                      {subscription?.planId === 'enterprise' ? 'Enterprise Plan' : 
+                       subscription?.planId === 'professional' ? 'Professional Plan' : 
+                       subscription?.planId === 'premium' ? 'Premium Plan' : 'Pro Plan'}
                     </span>
                   </div>
                 ) : (
                   <Link
                     to="/pricing"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-2 px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors"
                   >
                     <Crown className="h-4 w-4" />
                     <span className="font-medium">Upgrade to Premium</span>

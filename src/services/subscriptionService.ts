@@ -1,11 +1,3 @@
-import { loadStripe } from '@stripe/stripe-js'
-
-// ✅ Use correct environment typing with Vite
-const STRIPE_PUBLISHABLE_KEY =
-  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_example'
-
-const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY)
-
 export interface SubscriptionPlan {
   id: string
   name: string
@@ -14,6 +6,7 @@ export interface SubscriptionPlan {
   interval: 'month' | 'year'
   features: string[]
   popular?: boolean
+  badge?: string
 }
 
 export const subscriptionPlans: SubscriptionPlan[] = [
@@ -24,43 +17,66 @@ export const subscriptionPlans: SubscriptionPlan[] = [
     currency: 'INR',
     interval: 'month',
     features: [
-      'Historical stock data',
-      'Basic charts and analysis',
-      'Market news updates',
+      'View live bank stock prices',
+      'Basic market data',
+      'Limited predictions (3/day)',
       'Email support',
+      'Basic charts'
     ],
   },
   {
     id: 'premium',
     name: 'Premium',
-    price: 999,
+    price: 49,
     currency: 'INR',
     interval: 'month',
     popular: true,
+    badge: 'Most Popular',
     features: [
       'Everything in Basic',
-      'Daily AI predictions',
+      'Unlimited AI predictions',
       'Advanced technical indicators',
       'Real-time alerts',
-      'Portfolio tracking',
+      'Trading recommendations',
+      'Commission-based trading links',
       'Priority support',
-      'Export data to Excel/CSV',
+      'Export data (Excel/PDF)'
     ],
   },
   {
-    id: 'pro',
+    id: 'professional',
     name: 'Professional',
-    price: 1999,
+    price: 149,
     currency: 'INR',
     interval: 'month',
+    badge: 'Best Value',
     features: [
       'Everything in Premium',
-      'Multiple stock predictions',
-      'Custom ML model training',
+      'Advanced portfolio analytics',
+      'Custom watchlists (unlimited)',
       'API access',
+      'Advanced risk management',
+      'Institutional-grade data',
+      'Phone support',
+      'Custom alerts & notifications'
+    ],
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    price: 299,
+    currency: 'INR',
+    interval: 'month',
+    badge: 'Enterprise',
+    features: [
+      'Everything in Professional',
       'White-label solution',
+      'Custom ML model training',
       'Dedicated account manager',
       'Custom integrations',
+      'Advanced reporting',
+      '24/7 priority support',
+      'Custom development'
     ],
   },
 ]
@@ -82,11 +98,7 @@ class SubscriptionService {
       const stored = localStorage.getItem('userSubscription')
       if (stored) {
         const parsed = JSON.parse(stored)
-        if (
-          parsed &&
-          typeof parsed.planId === 'string' &&
-          typeof parsed.status === 'string'
-        ) {
+        if (parsed && typeof parsed.planId === 'string' && typeof parsed.status === 'string') {
           this.currentSubscription = parsed as UserSubscription
         }
       }
@@ -99,25 +111,53 @@ class SubscriptionService {
 
   hasPremiumAccess(): boolean {
     const sub = this.getCurrentSubscription()
-    return sub?.status === 'active' && ['premium', 'pro'].includes(sub.planId)
+    return sub?.status === 'active' && ['premium', 'professional', 'enterprise'].includes(sub.planId)
   }
 
   hasProAccess(): boolean {
     const sub = this.getCurrentSubscription()
-    return sub?.status === 'active' && sub.planId === 'pro'
+    return sub?.status === 'active' && ['professional', 'enterprise'].includes(sub.planId)
+  }
+
+  hasEnterpriseAccess(): boolean {
+    const sub = this.getCurrentSubscription()
+    return sub?.status === 'active' && sub.planId === 'enterprise'
   }
 
   async createCheckoutSession(planId: string): Promise<void> {
     try {
-      const stripe = await stripePromise
-      if (!stripe) throw new Error('Stripe not initialized')
-
       const plan = subscriptionPlans.find((p) => p.id === planId)
       if (!plan) throw new Error('Invalid plan selected')
 
-      // ✅ Mocked logic for demo/testing
+      // Create PayTM payment URL with hidden UPI
+      const paymentData = {
+        amount: plan.price,
+        planId: planId,
+        planName: plan.name,
+        upiId: '8449779923@pthdfc', // Hidden from user
+        merchantName: 'StockSage Pro'
+      }
+
+      // Encode payment data
+      const encodedData = btoa(JSON.stringify(paymentData))
+      
+      // Redirect to payment page with encoded data
+      window.location.href = `/payment?data=${encodedData}`
+      
+    } catch (error) {
+      console.error('Checkout failed:', error)
+      throw error
+    }
+  }
+
+  async processPayment(paymentData: any): Promise<boolean> {
+    try {
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // Create subscription
       const subscription: UserSubscription = {
-        planId,
+        planId: paymentData.planId,
         status: 'active',
         currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         cancelAtPeriodEnd: false,
@@ -126,10 +166,10 @@ class SubscriptionService {
       localStorage.setItem('userSubscription', JSON.stringify(subscription))
       this.currentSubscription = subscription
 
-      window.location.href = '/subscription-success'
+      return true
     } catch (error) {
-      console.error('Checkout failed:', error)
-      throw error
+      console.error('Payment processing failed:', error)
+      return false
     }
   }
 
@@ -143,20 +183,6 @@ class SubscriptionService {
       this.currentSubscription = sub
     } catch (error) {
       console.error('Cancel failed:', error)
-      throw error
-    }
-  }
-
-  async reactivateSubscription(): Promise<void> {
-    try {
-      const sub = this.getCurrentSubscription()
-      if (!sub) throw new Error('No subscription to reactivate')
-
-      sub.cancelAtPeriodEnd = false
-      localStorage.setItem('userSubscription', JSON.stringify(sub))
-      this.currentSubscription = sub
-    } catch (error) {
-      console.error('Reactivation failed:', error)
       throw error
     }
   }
