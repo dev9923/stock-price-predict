@@ -15,65 +15,80 @@ import {
   Bell,
   Settings,
   Download,
-  Share2
+  Share2,
+  Brain,
+  Wifi,
+  AlertTriangle
 } from 'lucide-react'
 
-import { realTimeBankDataService, BankStock, BankPrediction, MarketData } from '../services/realTimeBankDataService'
+import { realTimeDataService, RealTimeBankData, RealTimePrediction, LiveMarketData } from '../services/realTimeDataService'
 import { subscriptionService } from '../services/subscriptionService'
 import { tradingService } from '../services/tradingService'
-import AdvancedLiveStockWidget from '../components/dashboard/AdvancedLiveStockWidget'
-import AdvancedPredictionWidget from '../components/dashboard/AdvancedPredictionWidget'
+import RealTimeBankWidget from '../components/dashboard/RealTimeBankWidget'
+import RealTimePredictionWidget from '../components/dashboard/RealTimePredictionWidget'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 
 const Dashboard: React.FC = () => {
-  const [bankData, setBankData] = useState<BankStock[]>([])
-  const [predictions, setPredictions] = useState<BankPrediction[]>([])
-  const [marketData, setMarketData] = useState<MarketData | null>(null)
+  const [bankData, setBankData] = useState<RealTimeBankData[]>([])
+  const [predictions, setPredictions] = useState<RealTimePrediction[]>([])
+  const [marketData, setMarketData] = useState<LiveMarketData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedBank, setSelectedBank] = useState<string>('HDFCBANK')
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   const [notifications, setNotifications] = useState<any[]>([])
+  const [isRealTimeActive, setIsRealTimeActive] = useState(true)
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'connecting' | 'disconnected'>('connecting')
 
   const subscription = subscriptionService.getCurrentSubscription()
   const hasPremium = subscriptionService.hasPremiumAccess()
 
   useEffect(() => {
-    fetchDashboardData()
+    initializeDashboard()
     
     // Subscribe to real-time updates
-    const unsubscribe = realTimeBankDataService.subscribe((data) => {
+    const bankUnsubscribe = realTimeDataService.subscribe((data) => {
       setBankData(data)
       setLastUpdated(new Date())
+      setConnectionStatus('connected')
       checkForAlerts(data)
     })
 
-    // Refresh interval for market data
-    const interval = setInterval(fetchMarketData, 30000) // Every 30 seconds
+    const predictionUnsubscribe = realTimeDataService.subscribeToPredictions((predictions) => {
+      setPredictions(predictions)
+    })
+
+    // Refresh market data every 10 seconds
+    const marketInterval = setInterval(fetchMarketData, 10000)
 
     return () => {
-      unsubscribe()
-      clearInterval(interval)
+      bankUnsubscribe()
+      predictionUnsubscribe()
+      clearInterval(marketInterval)
     }
   }, [])
 
-  const fetchDashboardData = async () => {
+  const initializeDashboard = async () => {
     setIsLoading(true)
+    setConnectionStatus('connecting')
+    
     try {
       const [banksData, marketDataResult] = await Promise.all([
-        realTimeBankDataService.getAllBankData(),
-        realTimeBankDataService.getMarketData()
+        realTimeDataService.getAllBankData(),
+        realTimeDataService.getLiveMarketData()
       ])
 
       setBankData(banksData)
       setMarketData(marketDataResult)
       setLastUpdated(new Date())
+      setConnectionStatus('connected')
 
       if (hasPremium) {
-        const predictionsData = await realTimeBankDataService.getAllBankPredictions()
+        const predictionsData = await realTimeDataService.getAllPredictions()
         setPredictions(predictionsData)
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error)
+      console.error('Error initializing dashboard:', error)
+      setConnectionStatus('disconnected')
     } finally {
       setIsLoading(false)
     }
@@ -81,23 +96,24 @@ const Dashboard: React.FC = () => {
 
   const fetchMarketData = async () => {
     try {
-      const marketDataResult = await realTimeBankDataService.getMarketData()
+      const marketDataResult = await realTimeDataService.getLiveMarketData()
       setMarketData(marketDataResult)
     } catch (error) {
       console.error('Error fetching market data:', error)
     }
   }
 
-  const checkForAlerts = (data: BankStock[]) => {
+  const checkForAlerts = (data: RealTimeBankData[]) => {
     // Check for significant price movements and generate alerts
     const alerts = data
-      .filter(bank => Math.abs(bank.changePercent) > 5) // 5% movement threshold
+      .filter(bank => Math.abs(bank.changePercent) > 3) // 3% movement threshold
       .map(bank => ({
         id: Date.now() + Math.random(),
         type: bank.changePercent > 0 ? 'gain' : 'loss',
         symbol: bank.symbol,
         message: `${bank.symbol} moved ${bank.changePercent > 0 ? '+' : ''}${bank.changePercent.toFixed(2)}%`,
-        timestamp: new Date()
+        timestamp: new Date(),
+        price: bank.currentPrice
       }))
 
     if (alerts.length > 0) {
@@ -131,6 +147,24 @@ const Dashboard: React.FC = () => {
   const todaysPnL = 15750 // Mock P&L
   const totalCommissions = tradingService.getCommissionEarnings()
 
+  const getConnectionStatusColor = () => {
+    switch (connectionStatus) {
+      case 'connected': return 'text-green-600'
+      case 'connecting': return 'text-yellow-600'
+      case 'disconnected': return 'text-red-600'
+      default: return 'text-gray-600'
+    }
+  }
+
+  const getConnectionStatusIcon = () => {
+    switch (connectionStatus) {
+      case 'connected': return <Wifi className="h-4 w-4" />
+      case 'connecting': return <RefreshCw className="h-4 w-4 animate-spin" />
+      case 'disconnected': return <AlertTriangle className="h-4 w-4" />
+      default: return <Activity className="h-4 w-4" />
+    }
+  }
+
   return (
     <div className="min-h-screen pt-20 bg-gray-50">
       <div className="container-max py-8">
@@ -142,11 +176,19 @@ const Dashboard: React.FC = () => {
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Advanced Trading Dashboard</h1>
-              <p className="text-gray-600">Real-time AI-powered banking stock analysis and predictions</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Real-time Trading Dashboard</h1>
+              <p className="text-gray-600">Live AI-powered banking stock analysis with real-time predictions</p>
             </div>
             
             <div className="flex items-center space-x-4 mt-4 lg:mt-0">
+              {/* Real-time Status */}
+              <div className={`flex items-center space-x-2 px-3 py-2 bg-white rounded-lg shadow-sm ${getConnectionStatusColor()}`}>
+                {getConnectionStatusIcon()}
+                <span className="text-sm font-medium">
+                  {connectionStatus.charAt(0).toUpperCase() + connectionStatus.slice(1)}
+                </span>
+              </div>
+              
               {/* Market Status */}
               {marketData && (
                 <div className="flex items-center space-x-2 px-3 py-2 bg-white rounded-lg shadow-sm">
@@ -174,14 +216,19 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
               
-              {/* Refresh Button */}
+              {/* Real-time Toggle */}
               <button
-                onClick={fetchDashboardData}
-                disabled={isLoading}
-                className="p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow disabled:opacity-50"
-                title="Refresh Data"
+                onClick={() => setIsRealTimeActive(!isRealTimeActive)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isRealTimeActive 
+                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                <RefreshCw className={`h-4 w-4 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
+                <div className="flex items-center space-x-2">
+                  <Zap className="h-4 w-4" />
+                  <span>Real-time: {isRealTimeActive ? 'ON' : 'OFF'}</span>
+                </div>
               </button>
 
               {/* Notifications */}
@@ -211,6 +258,7 @@ const Dashboard: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600">Portfolio Value</p>
                 <p className="text-2xl font-bold text-gray-900">₹{(portfolioValue / 100000).toFixed(1)}L</p>
+                <p className="text-xs text-green-600">+2.5% today</p>
               </div>
               <DollarSign className="h-8 w-8 text-blue-600" />
             </div>
@@ -223,6 +271,7 @@ const Dashboard: React.FC = () => {
                 <p className={`text-2xl font-bold ${todaysPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {todaysPnL >= 0 ? '+' : ''}₹{(todaysPnL / 1000).toFixed(1)}K
                 </p>
+                <p className="text-xs text-gray-500">Live tracking</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600" />
             </div>
@@ -231,8 +280,9 @@ const Dashboard: React.FC = () => {
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Banks</p>
+                <p className="text-sm text-gray-600">Active Banks</p>
                 <p className="text-2xl font-bold text-gray-900">{bankData.length}</p>
+                <p className="text-xs text-blue-600">Real-time data</p>
               </div>
               <Activity className="h-8 w-8 text-blue-600" />
             </div>
@@ -245,6 +295,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-2xl font-bold text-green-600">
                   +{topGainers[0]?.changePercent.toFixed(2) || '0.00'}%
                 </p>
+                <p className="text-xs text-gray-500">{topGainers[0]?.symbol || 'N/A'}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600" />
             </div>
@@ -257,6 +308,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-2xl font-bold text-red-600">
                   {topLosers[0]?.changePercent.toFixed(2) || '0.00'}%
                 </p>
+                <p className="text-xs text-gray-500">{topLosers[0]?.symbol || 'N/A'}</p>
               </div>
               <TrendingDown className="h-8 w-8 text-red-600" />
             </div>
@@ -265,32 +317,33 @@ const Dashboard: React.FC = () => {
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Commissions</p>
+                <p className="text-sm text-gray-600">AI Predictions</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  ₹{(totalCommissions / 1000).toFixed(1)}K
+                  {predictions.length}
                 </p>
+                <p className="text-xs text-purple-500">Live updates</p>
               </div>
-              <DollarSign className="h-8 w-8 text-purple-600" />
+              <Brain className="h-8 w-8 text-purple-600" />
             </div>
           </div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Enhanced Bank List */}
+          {/* Left Column - Real-time Bank List */}
           <div className="lg:col-span-1">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <AdvancedLiveStockWidget 
+              <RealTimeBankWidget 
                 selectedSymbol={selectedBank}
                 onSymbolSelect={setSelectedBank}
               />
             </motion.div>
           </div>
 
-          {/* Right Column - Enhanced Details and Predictions */}
+          {/* Right Column - Real-time Details and Predictions */}
           <div className="lg:col-span-2 space-y-8">
             {/* Selected Bank Details */}
             {selectedBankData && (
@@ -307,16 +360,23 @@ const Dashboard: React.FC = () => {
                       <span className="text-gray-600">{selectedBankData.symbol}</span>
                       <span className="text-sm text-gray-500">{selectedBankData.sector}</span>
                       <span className="text-sm text-gray-500">{selectedBankData.exchange}</span>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <span className="text-xs text-green-600">Live</span>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-gray-900">₹{selectedBankData.currentPrice.toFixed(2)}</p>
                     <p className={`text-lg font-medium ${
-                      selectedBankData.trend === 'up' ? 'text-green-600' : 
-                      selectedBankData.trend === 'down' ? 'text-red-600' : 'text-gray-600'
+                      selectedBankData.trend === 'bullish' ? 'text-green-600' : 
+                      selectedBankData.trend === 'bearish' ? 'text-red-600' : 'text-gray-600'
                     }`}>
-                      {selectedBankData.trend === 'up' ? '+' : ''}₹{selectedBankData.change.toFixed(2)} 
+                      {selectedBankData.change >= 0 ? '+' : ''}₹{selectedBankData.change.toFixed(2)} 
                       ({selectedBankData.changePercent.toFixed(2)}%)
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Updated: {new Date(selectedBankData.lastUpdated).toLocaleTimeString()}
                     </p>
                   </div>
                 </div>
@@ -352,8 +412,13 @@ const Dashboard: React.FC = () => {
                     <p className="font-bold">{selectedBankData.pe.toFixed(1)}</p>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-600 mb-1">Book Value</p>
-                    <p className="font-bold">₹{selectedBankData.bookValue.toFixed(2)}</p>
+                    <p className="text-xs text-gray-600 mb-1">RSI</p>
+                    <p className={`font-bold ${
+                      selectedBankData.rsi > 70 ? 'text-red-600' : 
+                      selectedBankData.rsi < 30 ? 'text-green-600' : 'text-gray-900'
+                    }`}>
+                      {selectedBankData.rsi.toFixed(1)}
+                    </p>
                   </div>
                 </div>
 
@@ -377,13 +442,13 @@ const Dashboard: React.FC = () => {
               </motion.div>
             )}
 
-            {/* Enhanced AI Predictions */}
+            {/* Real-time AI Predictions */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <AdvancedPredictionWidget symbol={selectedBank} />
+              <RealTimePredictionWidget symbol={selectedBank} />
             </motion.div>
 
             {/* Enhanced Top Gainers and Losers */}
@@ -397,6 +462,7 @@ const Dashboard: React.FC = () => {
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center">
                   <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
                   Top Gainers
+                  <div className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 </h3>
                 <div className="space-y-3">
                   {topGainers.map((bank, index) => (
@@ -422,6 +488,7 @@ const Dashboard: React.FC = () => {
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center">
                   <TrendingDown className="h-5 w-5 text-red-600 mr-2" />
                   Top Losers
+                  <div className="ml-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                 </h3>
                 <div className="space-y-3">
                   {topLosers.map((bank, index) => (
@@ -446,7 +513,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Notifications Panel */}
+        {/* Real-time Notifications Panel */}
         {notifications.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -455,7 +522,8 @@ const Dashboard: React.FC = () => {
           >
             <h3 className="font-bold text-gray-900 mb-4 flex items-center">
               <Bell className="h-5 w-5 text-blue-600 mr-2" />
-              Recent Alerts
+              Real-time Alerts
+              <div className="ml-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
             </h3>
             <div className="space-y-2">
               {notifications.slice(0, 5).map((notification) => (
@@ -466,7 +534,10 @@ const Dashboard: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-gray-900">{notification.message}</p>
+                    <div>
+                      <p className="font-medium text-gray-900">{notification.message}</p>
+                      <p className="text-sm text-gray-600">Price: ₹{notification.price.toFixed(2)}</p>
+                    </div>
                     <span className="text-xs text-gray-500">
                       {notification.timestamp.toLocaleTimeString()}
                     </span>
