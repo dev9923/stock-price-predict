@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { 
   Brain, 
   TrendingUp, 
+  TrendingDown,
   Shield, 
   Zap, 
   Target, 
