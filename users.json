@@ -1,0 +1,17 @@
+{
+  "admin": {
+    "password": "admin123",
+    "subscription": {
+      "planId": "enterprise",
+      "status": "active"
+    }
+  },
+  "Devru23": {
+    "email": "devanshbansal500@gmail.com",
+    "password": "9be1f2eed230bf11ec9bbe46258c1e1b9634dd9e6a0c8b295031fa4e459238c1",
+    "subscription": {
+      "planId": "basic",
+      "status": "active"
+    }
+  }
+}

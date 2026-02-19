@@ -1,0 +1,143 @@
+import yahooFinance from 'yahoo-finance2';
+import * as ss from 'simple-statistics';
+import { RSI, SMA, MACD } from 'technicalindicators';
+
+// Initialize RSS Parser removed
+
+
+export interface StockDataPoint {
+    date: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+}
+
+export interface PredictionResult {
+    nextDay: number;
+    next5Days: number[];
+    trend: 'up' | 'down' | 'neutral';
+    confidence: number; // Simplified confidence score
+}
+
+// Fetch historical data
+export async function getStockHistory(symbol: string, period = '1y'): Promise<StockDataPoint[]> {
+    const result = await yahooFinance.historical(symbol, { period1: '2023-01-01' }); // Dynamic period logic is better
+    // Use period1 as calculate based on period string roughly. 
+    // For simplicity, just fetch a fixed long period or default to Yahoo's logic if undefined. 
+    // Yahoo's "period1" is start date. 
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setFullYear(startDate.getFullYear() - 1); // 1 year ago default
+
+    const queryOptions = {
+        period1: startDate.toISOString().split('T')[0],
+        period2: endDate.toISOString().split('T')[0],
+    };
+
+    const quotes = await yahooFinance.historical(symbol, queryOptions) as any[];
+
+    return quotes.map((q: any) => ({
+        date: q.date.toISOString().split('T')[0],
+        open: q.open,
+        high: q.high,
+        low: q.low,
+        close: q.close,
+        volume: q.volume,
+    }));
+}
+
+// Fetch real-time (ish) quote
+export async function getStockQuote(symbol: string) {
+    return await yahooFinance.quote(symbol);
+}
+
+// Fetch News from Google News RSS
+export async function getStockNews(symbol: string) {
+    try {
+        const res = await fetch(`https://news.google.com/rss/search?q=${symbol}+stock&hl=en-US&gl=US&ceid=US:en`);
+        const text = await res.text();
+
+        // Simple regex to parse items (robust enough for RSS 2.0 standard structure)
+        const items = [];
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+        const titleRegex = /<title>(.*?)<\/title>/;
+        const linkRegex = /<link>(.*?)<\/link>/;
+        const pubDateRegex = /<pubDate>(.*?)<\/pubDate>/;
+        const sourceRegex = /<source url=".*?">(.*?)<\/source>/;
+
+        let match;
+        while ((match = itemRegex.exec(text)) !== null) {
+            const itemContent = match[1];
+            const title = titleRegex.exec(itemContent)?.[1] || '';
+            const link = linkRegex.exec(itemContent)?.[1] || '';
+            const pubDate = pubDateRegex.exec(itemContent)?.[1] || '';
+            const source = sourceRegex.exec(itemContent)?.[1] || 'Google News';
+
+            items.push({
+                title: title.replace('<![CDATA[', '').replace(']]>', ''),
+                link,
+                pubDate,
+                source
+            });
+            if (items.length >= 10) break;
+        }
+        return items;
+    } catch (error) {
+        console.error("Error fetching news:", error);
+        return [];
+    }
+}
+
+// Calculate Predictions using Linear Regression on recent data
+export function calculatePrediction(history: StockDataPoint[], daysToPredict = 5): PredictionResult {
+    if (history.length < 50) {
+        return { nextDay: 0, next5Days: [], trend: 'neutral', confidence: 0 };
+    }
+
+    // Use last 30 days for short-term trend prediction
+    const recentData = history.slice(-30);
+    const dataPoints = recentData.map((d, i) => [i, d.close]); // [x, y]
+
+    const regressionLine = ss.linearRegression(dataPoints);
+    const regressionLineFn = ss.linearRegressionLine(regressionLine);
+
+    const nextDay = regressionLineFn(30); // 30 is the next index (0 to 29 exist)
+    const next5Days = Array.from({ length: daysToPredict }, (_, i) => regressionLineFn(30 + i));
+
+    const rSquared = ss.rSquared(dataPoints, regressionLineFn); // Coefficient of determination (confidence proxy)
+
+    return {
+        nextDay,
+        next5Days,
+        trend: regressionLine.m > 0 ? 'up' : 'down',
+        confidence: rSquared,
+    };
+}
+
+// Calculate Technical Indicators
+export function calculateIndicators(history: StockDataPoint[]) {
+    const closes = history.map(d => d.close);
+
+    const rsi = RSI.calculate({ values: closes, period: 14 });
+    const sma50 = SMA.calculate({ values: closes, period: 50 });
+    const sma200 = SMA.calculate({ values: closes, period: 200 });
+
+    const macdInput = {
+        values: closes,
+        fastPeriod: 12,
+        slowPeriod: 26,
+        signalPeriod: 9,
+        SimpleMAOscillator: false,
+        SimpleMASignal: false,
+    };
+    const macd = MACD.calculate(macdInput);
+
+    return {
+        rsi: rsi[rsi.length - 1],
+        sma50: sma50[sma50.length - 1],
+        sma200: sma200[sma200.length - 1],
+        macd: macd[macd.length - 1],
+    };
+}

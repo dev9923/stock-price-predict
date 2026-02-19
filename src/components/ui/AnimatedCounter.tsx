@@ -1,47 +1,40 @@
-import React, { useEffect, useState } from 'react'
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { useInView, motion, useSpring, useTransform } from 'framer-motion';
 
 interface AnimatedCounterProps {
-  value: number
-  duration?: number
-  suffix?: string
-  prefix?: string
-  className?: string
+    value: number;
+    prefix?: string;
+    suffix?: string;
+    decimals?: number;
 }
 
-const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
-  value,
-  duration = 2000,
-  suffix = '',
-  prefix = '',
-  className = ''
-}) => {
-  const [count, setCount] = useState(0)
+export default function AnimatedCounter({ value, prefix = '', suffix = '', decimals = 0 }: AnimatedCounterProps) {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
 
-  useEffect(() => {
-    let startTime: number | undefined
-    let animationFrame: number
+    const [displayValue, setDisplayValue] = useState(`${prefix}${(0).toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    })}${suffix}`);
 
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime
-      const progress = Math.min((currentTime - startTime) / duration, 1)
-      setCount(Math.floor(progress * value))
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate)
-      }
-    }
+    const spring = useSpring(0, { mass: 1, stiffness: 50, damping: 20 });
 
-    animationFrame = requestAnimationFrame(animate)
+    useEffect(() => {
+        if (isInView) {
+            spring.set(value);
+        }
+    }, [isInView, value, spring]);
 
-    return () => cancelAnimationFrame(animationFrame)
-  }, [value, duration])
+    useEffect(() => {
+        return spring.on('change', (latest: number) => {
+            setDisplayValue(`${prefix}${latest.toLocaleString(undefined, {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+            })}${suffix}`);
+        });
+    }, [spring, prefix, suffix, decimals]);
 
-  return (
-    <span className={className}>
-      {prefix}
-      {count.toLocaleString()}
-      {suffix}
-    </span>
-  )
+    return <span ref={ref}>{displayValue}</span>;
 }
-
-export default AnimatedCounter
